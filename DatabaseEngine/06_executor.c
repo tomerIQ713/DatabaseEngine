@@ -788,6 +788,186 @@ static int executeInsert(const InsertStatement* insert, ResultSet* out)
  * table. Compaction moves live rows to new positions, so the rebuild is not an
  * optimisation - the old index entries would point at the wrong rows.
  */
+/*
+ * ALTER TABLE.
+ *
+ * ADD and DROP COLUMN have to rewrite every row, because a record carries its
+ * own column count and its fields are variable-length: a row written before
+ * the change decodes with the old shape, and there is no way to reinterpret it
+ * in place. So both do what VACUUM does - rewrite, then rebuild the indexes -
+ * with the transformation applied on the way through.
+ *
+ * The rewrite is two passes on purpose. Inserting into the heap being scanned
+ * would append rows the scan then walks into, so the live positions are
+ * collected first and only then rewritten.
+ */
+static int rewriteRows(const CatalogNode* table, Heap* heap,
+                       int dropped, const Value* added)
+{
+    int errorCode = reserveCandidates(heapSlots(heap));
+    if (errorCode != SUCCESS_CODE)
+        return errorCode;
+
+    int* rows  = candidates;
+    int  nrows = ZERO;
+
+    for (int r = heapFirst(heap); r >= ZERO; r = heapNext(heap, r))
+        rows[nrows++] = r;
+
+    for (int i = ZERO; i < nrows; i++) {
+        /* heapRead interns this row's text; heapInsert copies it into the new
+           record, so the arena can be wound back before the next one. */
+        ArenaMark mark = textMark();
+        Row       row;
+
+        errorCode = heapRead(heap, rows[i], &row);
+        if (errorCode != SUCCESS_CODE) {
+            textReset(mark);
+            return errorCode;
+        }
+
+        if (row.deleted) {
+            textReset(mark);
+            continue;
+        }
+
+        if (dropped >= ZERO) {
+            for (int c = dropped; c + ONE < row.ncols; c++)
+                row.values[c] = row.values[c + ONE];
+            row.ncols--;
+        }
+        else {
+            /* A row written before the column existed simply has fewer fields
+               than the table now has, so the new value goes at the end. */
+            row.values[row.ncols++] = *added;
+        }
+
+        int landed;
+        errorCode = heapInsert(heap, &row, &landed);
+        if (errorCode == SUCCESS_CODE)
+            errorCode = heapMarkDeleted(heap, rows[i]);
+
+        textReset(mark);
+
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+    }
+
+    int reclaimed;
+    errorCode = heapCompact(heap, &reclaimed);
+    if (errorCode != SUCCESS_CODE)
+        return errorCode;
+
+    return rebuildIndexes(table->table, heap);
+}
+
+static int executeAlter(const AlterStatement* alter, ResultSet* out)
+{
+    CatalogNode* table = findTable(alter->table);
+    Heap*        heap  = findHeap(alter->table);
+
+    if (table == NULL || heap == NULL)
+        return ERROR_SEMANTIC_TABLE_NOT_FOUND;
+
+    switch (alter->action) {
+    case ALTER_ADD_COLUMN: {
+        if (findColumn(table, alter->column.name) >= ZERO)
+            return ERROR_SEMANTIC_DUPLICATE_COLUMN;
+
+        if (table->ncols == MAX_COLS)
+            return ERROR_EXEC_TABLE_TOO_WIDE;
+
+        /* What every existing row gets. NOT NULL with rows already in the
+           table needs a DEFAULT to be satisfiable, which the semantic stage
+           has already insisted on. */
+        Value filled;
+
+        if (alter->column.hasDefault) {
+            filled = alter->column.defaultValue;
+        }
+        else {
+            memset(&filled, ZERO, sizeof filled);
+            filled.isNull = ONE;
+            filled.type   = alter->column.type;
+        }
+
+        table->cols[table->ncols++] = alter->column;
+
+        int errorCode = rewriteRows(table, heap, -ONE, &filled);
+        if (errorCode != SUCCESS_CODE) {
+            table->ncols--;                     /* put the catalog back */
+            return errorCode;
+        }
+
+        snprintf(out->message, VALUE_LEN, "%s: column %s added",
+                 table->table, alter->column.name);
+        return SUCCESS_CODE;
+    }
+
+    case ALTER_DROP_COLUMN: {
+        int slot = findColumn(table, alter->name);
+
+        if (slot < ZERO)
+            return ERROR_SEMANTIC_COLUMN_NOT_FOUND;
+        if (table->ncols == ONE)
+            return ERROR_SEMANTIC_LAST_COLUMN;
+
+        /* The trees on this column go, and every tree on a later column is
+           now reading a slot that has shifted down. Done before the rewrite,
+           so the rebuild that ends it fills the corrected slots. */
+        indexesColumnDropped(table->table, table->cols[slot].name, slot);
+
+        for (int c = slot; c + ONE < table->ncols; c++)
+            table->cols[c] = table->cols[c + ONE];
+        table->ncols--;
+
+        int errorCode = rewriteRows(table, heap, slot, NULL);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        snprintf(out->message, VALUE_LEN, "%s: column %s dropped",
+                 table->table, alter->name);
+        return SUCCESS_CODE;
+    }
+
+    case ALTER_RENAME_COLUMN: {
+        int slot = findColumn(table, alter->name);
+
+        if (slot < ZERO)
+            return ERROR_SEMANTIC_COLUMN_NOT_FOUND;
+        if (findColumn(table, alter->newName) >= ZERO)
+            return ERROR_SEMANTIC_DUPLICATE_COLUMN;
+
+        /* Names only: a record stores values in slot order and says nothing
+           about what they are called, so no row is touched. */
+        indexesColumnRenamed(table->table, table->cols[slot].name, alter->newName);
+        snprintf(table->cols[slot].name, NAME_LEN, "%s", alter->newName);
+
+        snprintf(out->message, VALUE_LEN, "%s: column %s renamed to %s",
+                 table->table, alter->name, alter->newName);
+        return SUCCESS_CODE;
+    }
+
+    case ALTER_RENAME_TABLE: {
+        char was[NAME_LEN];
+        snprintf(was, NAME_LEN, "%s", table->table);
+
+        int errorCode = renameTableInCatalog(was, alter->newName);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        renameHeap(was, alter->newName);
+        indexesTableRenamed(was, alter->newName);
+
+        snprintf(out->message, VALUE_LEN, "table %s renamed to %s",
+                 was, alter->newName);
+        return SUCCESS_CODE;
+    }
+    }
+
+    return ERROR_SYNTAX_INVALID_STATEMENT;
+}
+
 static int executeVacuum(const char* tableName, ResultSet* out)
 {
     const CatalogNode* table = findTable(tableName);
@@ -2548,6 +2728,9 @@ int executeStatement(Statement* statement, ResultSet* out)
 
     case STMT_VACUUM:
         return executeVacuum(statement->u.vacuumTable, out);
+
+    case STMT_ALTER_TABLE:
+        return executeAlter(&statement->u.alter, out);
 
     case STMT_CREATE_DATABASE: {
         int errorCode = createDatabase(statement->u.databaseName);

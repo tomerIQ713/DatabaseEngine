@@ -82,6 +82,11 @@ static TokenType classifyWord(const char* word, size_t length)
     case PACK_4_LOWER('u', 'n', 'i', 'q'):  KEYWORD(6, "ue",  TOKEN_KEYWORD_UNIQUE);
     case PACK_4_LOWER('d', 'e', 'f', 'a'):  KEYWORD(7, "ult", TOKEN_KEYWORD_DEFAULT);
     case PACK_4_LOWER('c', 'h', 'e', 'c'):  KEYWORD(5, "k",   TOKEN_KEYWORD_CHECK);
+    case PACK_4_LOWER('a', 'l', 't', 'e'):  KEYWORD(5, "r",   TOKEN_KEYWORD_ALTER);
+    case PACK_4_LOWER('a', 'd', 'd', 0):    KEYWORD(3, "",    TOKEN_KEYWORD_ADD);
+    case PACK_4_LOWER('c', 'o', 'l', 'u'):  KEYWORD(6, "mn",  TOKEN_KEYWORD_COLUMN);
+    case PACK_4_LOWER('r', 'e', 'n', 'a'):  KEYWORD(6, "me",  TOKEN_KEYWORD_RENAME);
+    case PACK_4_LOWER('t', 'o', 0, 0):      KEYWORD(2, "",    TOKEN_KEYWORD_TO);
     case PACK_4_LOWER('d', 'e', 'l', 'e'):  KEYWORD(6, "te",  TOKEN_KEYWORD_DELETE);
     case PACK_4_LOWER('u', 'p', 'd', 'a'):  KEYWORD(6, "te",  TOKEN_KEYWORD_UPDATE);
     case PACK_4_LOWER('s', 'e', 't', 0):    KEYWORD(3, "",    TOKEN_KEYWORD_SET);

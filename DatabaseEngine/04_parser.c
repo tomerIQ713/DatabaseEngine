@@ -1331,6 +1331,115 @@ static int parseVacuum(const TokenList* tokens, char* table)
 }
 
 /*
+ * alter table <t> add [column] <c> <type> [constraints]
+ * alter table <t> drop column <c>
+ * alter table <t> rename column <c> to <new>
+ * alter table <t> rename to <new>
+ *
+ * The constraints a new column may carry are DEFAULT and NOT NULL. UNIQUE,
+ * PRIMARY KEY and CHECK are refused rather than half-honoured: each of them
+ * makes a claim about rows that already exist, and the rows are not looked at
+ * here. That refusal lives in the semantic stage, which can see the table.
+ */
+static int parseAlter(const TokenList* tokens, AlterStatement* out)
+{
+    int index = ONE;                                    /* ALTER is token 0 */
+
+    if (typeAt(tokens, index++) != TOKEN_KEYWORD_TABLE)
+        return ERROR_SYNTAX_EXPECTED_TABLE;
+
+    if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
+        return ERROR_SYNTAX_EXPECTED_TABLE_NAME;
+    snprintf(out->table, NAME_LEN, "%s", tokens->tokens[index++].value);
+
+    memset(&out->column, ZERO, sizeof out->column);
+    out->name[ZERO]    = '\0';
+    out->newName[ZERO] = '\0';
+
+    switch (typeAt(tokens, index++)) {
+    case TOKEN_KEYWORD_ADD: {
+        out->action = ALTER_ADD_COLUMN;
+
+        /* COLUMN is noise here, as it is in every dialect that accepts it */
+        if (typeAt(tokens, index) == TOKEN_KEYWORD_COLUMN)
+            index++;
+
+        if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
+            return ERROR_SYNTAX_EXPECTED_COLUMN;
+        snprintf(out->column.name, NAME_LEN, "%s", tokens->tokens[index++].value);
+
+        int errorCode = parseColumnType(tokens, &index, &out->column);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        /* A CHECK written here would have to be ANDed into a tree the table
+           already owns, so the scratch one is passed and its root inspected:
+           anything that landed in it is a CHECK, and CHECK is not supported. */
+        Condition scratch = { ZERO };
+        int       root    = -ONE;
+
+        scratch.count = ZERO;
+        errorCode = parseColumnConstraints(tokens, &index, &out->column,
+                                           &scratch, &root);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        if (root != -ONE)
+            return ERROR_SEMANTIC_ALTER_UNSUPPORTED;
+
+        break;
+    }
+
+    case TOKEN_KEYWORD_DROP:
+        out->action = ALTER_DROP_COLUMN;
+
+        if (typeAt(tokens, index) == TOKEN_KEYWORD_COLUMN)
+            index++;
+
+        if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
+            return ERROR_SYNTAX_EXPECTED_COLUMN;
+        snprintf(out->name, NAME_LEN, "%s", tokens->tokens[index++].value);
+        break;
+
+    case TOKEN_KEYWORD_RENAME:
+        /* "rename to x" renames the table; "rename column c to x" renames a
+           column. The word COLUMN is what separates them, so unlike above it
+           is not optional. */
+        if (typeAt(tokens, index) == TOKEN_KEYWORD_TO) {
+            index++;
+            out->action = ALTER_RENAME_TABLE;
+
+            if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
+                return ERROR_SYNTAX_EXPECTED_TABLE_NAME;
+            snprintf(out->newName, NAME_LEN, "%s", tokens->tokens[index++].value);
+            break;
+        }
+
+        if (typeAt(tokens, index++) != TOKEN_KEYWORD_COLUMN)
+            return ERROR_SYNTAX_EXPECTED_COLUMN;
+
+        out->action = ALTER_RENAME_COLUMN;
+
+        if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
+            return ERROR_SYNTAX_EXPECTED_COLUMN;
+        snprintf(out->name, NAME_LEN, "%s", tokens->tokens[index++].value);
+
+        if (typeAt(tokens, index++) != TOKEN_KEYWORD_TO)
+            return ERROR_SYNTAX_EXPECTED_TO;
+
+        if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
+            return ERROR_SYNTAX_EXPECTED_COLUMN;
+        snprintf(out->newName, NAME_LEN, "%s", tokens->tokens[index++].value);
+        break;
+
+    default:
+        return ERROR_SYNTAX_INVALID_STATEMENT;
+    }
+
+    return endOfStatement(tokens, index);
+}
+
+/*
  * Dispatches on the first token, exactly like parseStatement in the compiler.
  */
 int parseStatement(const TokenList* tokens, Statement* out)
@@ -1386,6 +1495,10 @@ int parseStatement(const TokenList* tokens, Statement* out)
     case TOKEN_KEYWORD_ROLLBACK:
         out->type = STMT_ROLLBACK;
         return endOfStatement(tokens, ONE);
+
+    case TOKEN_KEYWORD_ALTER:
+        out->type = STMT_ALTER_TABLE;
+        return parseAlter(tokens, &out->u.alter);
 
     case TOKEN_KEYWORD_DROP:
         return parseDrop(tokens, &out->type, out->u.dropName);

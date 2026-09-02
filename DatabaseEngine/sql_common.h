@@ -76,6 +76,8 @@
 #define ERROR_SYNTAX_EXPECTED_KEY           219
 #define ERROR_SYNTAX_EXPECTED_SIZE          220
 #define ERROR_SYNTAX_EXPRESSION_TOO_COMPLEX 221
+#define ERROR_SYNTAX_EXPECTED_TABLE         222
+#define ERROR_SYNTAX_EXPECTED_TO            223
 
 #define ERROR_SEMANTIC_TABLE_NOT_FOUND      300
 #define ERROR_SEMANTIC_TABLE_EXISTS         301
@@ -95,6 +97,9 @@
 #define ERROR_SEMANTIC_JOIN_TOO_WIDE        315
 #define ERROR_SEMANTIC_MISSING_VALUE        316
 #define ERROR_SEMANTIC_INVALID_DATE         317
+#define ERROR_SEMANTIC_LAST_COLUMN          318
+#define ERROR_SEMANTIC_ALTER_UNSUPPORTED    319
+#define ERROR_SEMANTIC_CHECK_BLOCKS_DROP    320
 #define ERROR_EXEC_TOO_MANY_DATABASES       404
 
 #define ERROR_EXEC_TABLE_FULL               400
@@ -112,6 +117,7 @@
 #define ERROR_EXEC_CHECK_FAILED             413
 #define ERROR_EXEC_VALUE_TOO_LONG           414
 #define ERROR_EXEC_DIVIDE_BY_ZERO           415
+#define ERROR_EXEC_TABLE_TOO_WIDE           416
 
 #define ERROR_IO_CANNOT_OPEN                600
 #define ERROR_IO_BAD_FORMAT                 601
@@ -192,6 +198,11 @@ typedef enum {
     TOKEN_KEYWORD_UNIQUE,
     TOKEN_KEYWORD_DEFAULT,
     TOKEN_KEYWORD_CHECK,
+    TOKEN_KEYWORD_ALTER,
+    TOKEN_KEYWORD_ADD,
+    TOKEN_KEYWORD_COLUMN,
+    TOKEN_KEYWORD_RENAME,
+    TOKEN_KEYWORD_TO,
 
     TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
@@ -444,11 +455,29 @@ typedef struct {
     Condition  where;
 } UpdateStatement;
 
+/* ALTER TABLE. The three that only touch names are separated from ADD and
+   DROP COLUMN because those two have to rewrite every row: a record carries
+   its own column count, so a row written before the change decodes with the
+   old shape. */
+typedef enum {
+    ALTER_ADD_COLUMN, ALTER_DROP_COLUMN,
+    ALTER_RENAME_COLUMN, ALTER_RENAME_TABLE
+} AlterAction;
+
+typedef struct {
+    char        table[NAME_LEN];
+    AlterAction action;
+    Column      column;                 /* ADD COLUMN: the column to append */
+    char        name[NAME_LEN];         /* DROP / RENAME COLUMN: which one */
+    char        newName[NAME_LEN];      /* RENAME COLUMN / RENAME TO: the new name */
+} AlterStatement;
+
 typedef enum {
     STMT_SELECT, STMT_CREATE_TABLE, STMT_CREATE_INDEX,
     STMT_INSERT, STMT_DELETE, STMT_UPDATE, STMT_VACUUM,
     STMT_DROP_TABLE, STMT_DROP_INDEX,
     STMT_CREATE_DATABASE, STMT_USE_DATABASE, STMT_DROP_DATABASE,
+    STMT_ALTER_TABLE,
     STMT_BEGIN, STMT_COMMIT, STMT_ROLLBACK      /* these carry nothing */
 } StatementType;
 
@@ -461,6 +490,7 @@ typedef struct {
         CreateIndexStatement createIndex;
         DeleteStatement del;            /* "delete" is a keyword in C++ headers */
         UpdateStatement update;
+        AlterStatement  alter;
         char vacuumTable[NAME_LEN];     /* VACUUM carries nothing but a name */
         char databaseName[NAME_LEN];    /* CREATE DATABASE / USE target */
         char dropName[NAME_LEN];        /* DROP TABLE / DROP INDEX target */
@@ -574,6 +604,7 @@ CatalogNode* findTable(const char* name);
 int          addTable(const char* name, const Column cols[], int ncols,
                       const Condition* check);
 int          findColumn(const CatalogNode* table, const char* name);
+int          renameTableInCatalog(const char* from, const char* to);
 int          buildJoinSchema(const char tables[][NAME_LEN],
                              const char aliases[][NAME_LEN], int ntables,
                              CatalogNode* out);
@@ -617,6 +648,7 @@ void setExplain(int on);
 /* ---------- 07 storage ---------- */
 void  initStorage(void);
 Heap* findHeap(const char* table);
+void  renameHeap(const char* from, const char* to);
 Heap* createHeap(const char* table);
 int   heapInsert(Heap* heap, const Row* row, int* position);
 int   heapRead(const Heap* heap, int position, Row* out);
@@ -693,6 +725,9 @@ int    indexKeyCount(const Index* index);
 int    indexInsert(Index* index, const Value* key, int rowPosition);
 int    indexInsertRow(const char* table, const Row* row, int rowPosition);
 int    rebuildIndexes(const char* table, const Heap* heap);
+void   indexesColumnDropped(const char* table, const char* column, int slot);
+void   indexesColumnRenamed(const char* table, const char* from, const char* to);
+void   indexesTableRenamed(const char* from, const char* to);
 int    dropIndexByName(const char* name);
 void   dropIndexesForTable(const char* table);
 int    listIndexes(const Index** out, int max);

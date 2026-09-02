@@ -335,6 +335,50 @@ int semanticCheck(Statement* statement)
         return findTable(statement->u.vacuumTable) != NULL
              ? SUCCESS_CODE : ERROR_SEMANTIC_TABLE_NOT_FOUND;
 
+    case STMT_ALTER_TABLE: {
+        AlterStatement*    alter = &statement->u.alter;
+        const CatalogNode* table = findTable(alter->table);
+
+        if (table == NULL)
+            return ERROR_SEMANTIC_TABLE_NOT_FOUND;
+
+        if (alter->action == ALTER_ADD_COLUMN) {
+            /* UNIQUE and PRIMARY KEY each assert something about rows that
+               already exist, and this stage is where that can be seen. Rather
+               than half-honour them - build an index over rows that all got
+               the same default, say - they are refused outright. */
+            if (alter->column.flags & (COL_UNIQUE | COL_PRIMARY))
+                return ERROR_SEMANTIC_ALTER_UNSUPPORTED;
+
+            /* NOT NULL is satisfiable only if every existing row can be given
+               a value, which means a DEFAULT unless there are no rows. */
+            const Heap* heap = findHeap(alter->table);
+
+            if ((alter->column.flags & COL_NOT_NULL) && !alter->column.hasDefault
+                && heap != NULL && heapLive(heap) > ZERO)
+                return ERROR_SEMANTIC_MISSING_VALUE;
+
+            if (alter->column.hasDefault)
+                return coerceLiteral(&alter->column.defaultValue,
+                                     alter->column.type);
+            return SUCCESS_CODE;
+        }
+
+        if (alter->action == ALTER_RENAME_TABLE)
+            return findTable(alter->newName) != NULL
+                 ? ERROR_SEMANTIC_TABLE_EXISTS : SUCCESS_CODE;
+
+        if (findColumn(table, alter->name) < ZERO)
+            return ERROR_SEMANTIC_COLUMN_NOT_FOUND;
+
+        /* A CHECK is compiled against slot positions, and dropping a column
+           shifts them. Renaming does not, so only the drop is refused. */
+        if (alter->action == ALTER_DROP_COLUMN && table->check != NULL)
+            return ERROR_SEMANTIC_CHECK_BLOCKS_DROP;
+
+        return SUCCESS_CODE;
+    }
+
     case STMT_SELECT:
         return checkSelect(&statement->u.select);
 

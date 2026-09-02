@@ -954,6 +954,56 @@ void printIndexes(void)
  * Cheaper to write than B-tree deletion, and it is what VACUUM needs anyway:
  * after compaction every row position has moved.
  */
+/*
+ * ALTER TABLE moves the ground an index stands on. Each of these puts one kind
+ * of change right; all three walk the list because an index is found by table
+ * and column rather than held by the CatalogNode.
+ */
+
+/* A dropped column takes its own indexes with it, and every column after it
+   shifts down one - so an index on a later column is still valid but is now
+   reading the wrong slot. */
+void indexesColumnDropped(const char* table, const char* column, int slot)
+{
+    Index** link = &indexList[currentDatabaseId()];
+
+    while (*link != NULL) {
+        Index* index = *link;
+
+        if (_stricmp(index->table, table) != ZERO) {
+            link = &index->next;
+            continue;
+        }
+
+        if (_stricmp(index->column, column) == ZERO) {
+            *link = index->next;
+            freeSubtree(index->rootPage);
+            free(index);
+            continue;                           /* link already points on */
+        }
+
+        if (index->slot > slot)
+            index->slot--;
+
+        link = &index->next;
+    }
+}
+
+void indexesColumnRenamed(const char* table, const char* from, const char* to)
+{
+    for (Index* index = indexList[currentDatabaseId()]; index != NULL; index = index->next)
+        if (_stricmp(index->table, table) == ZERO
+            && _stricmp(index->column, from) == ZERO)
+            snprintf(index->column, NAME_LEN, "%s", to);
+}
+
+void indexesTableRenamed(const char* from, const char* to)
+{
+    for (Index* index = indexList[currentDatabaseId()]; index != NULL; index = index->next)
+        if (_stricmp(index->table, from) == ZERO)
+            snprintf(index->table, NAME_LEN, "%s", to);
+}
+
 int rebuildIndexes(const char* table, const Heap* heap)
 {
     for (Index* index = indexList[currentDatabaseId()]; index != NULL; index = index->next) {

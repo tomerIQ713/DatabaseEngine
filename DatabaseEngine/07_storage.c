@@ -389,6 +389,14 @@ Heap* findHeap(const char* table)
     return NULL;
 }
 
+void renameHeap(const char* from, const char* to)
+{
+    Heap* heap = findHeap(from);
+
+    if (heap != NULL)
+        snprintf(heap->table, NAME_LEN, "%s", to);
+}
+
 Heap* createHeap(const char* table)
 {
     int db = currentDatabaseId();

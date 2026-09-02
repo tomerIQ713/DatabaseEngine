@@ -1,0 +1,128 @@
+in-memory only, nothing will be saved
+
+db> 
+db> 
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 
+db> 
+db> t: column score added
+
+db> id | name | score
+1 | ada | 1.5
+2 | bo | 1.5
+(2 rows)
+
+db> 
+db> 
+db> t: column note added
+
+db> id | name | score | note
+1 | ada | 1.5 | NULL
+2 | bo | 1.5 | NULL
+(2 rows)
+
+db> 1 row inserted into t
+
+db> id | name | score | note
+1 | ada | 1.5 | NULL
+2 | bo | 1.5 | NULL
+3 | cy | 9.5 | hi
+(3 rows)
+
+db> 
+db> 
+db> index ins created on t(score), 3 row(s) indexed
+
+db> index inn created on t(note), 3 row(s) indexed
+
+db> t: column name dropped
+
+db> --- indexes (main) ---
+inn on t(note): 1 key(s), depth 1
+ins on t(score): 3 key(s), depth 1
+
+db> 
+db> [index scan: inn on t(note)]
+id | score | note
+3 | 9.5 | hi
+(1 row)
+
+db> [index scan: ins on t(score)]
+id | score | note
+2 | 1.5 | NULL
+1 | 1.5 | NULL
+(2 rows)
+
+db> 
+db> 
+db> 
+db> t: column note renamed to memo
+
+db> id | memo
+1 | NULL
+2 | NULL
+3 | hi
+(3 rows)
+
+db> 
+db> table t renamed to people
+
+db> id | score | memo
+1 | 1.5 | NULL
+2 | 1.5 | NULL
+3 | 9.5 | hi
+(3 rows)
+
+db> --- catalog (main) ---
+people(id int, score float default, memo text)
+
+db> --- indexes (main) ---
+inn on people(memo): 1 key(s), depth 1
+ins on people(score): 3 key(s), depth 1
+
+db> 
+db> 
+db> error 305: duplicate column name
+
+db> error 319: unique, primary key and check are not supported on a new column
+
+db> error 319: unique, primary key and check are not supported on a new column
+
+db> error 316: a column with no value and no default
+
+db> error 302: no such column
+
+db> error 302: no such column
+
+db> error 301: table already exists
+
+db> error 300: no such table
+
+db> 
+db> table only created with 1 column(s)
+
+db> error 318: cannot drop the only column of a table
+
+db> 
+db> table guarded created with 2 column(s)
+
+db> error 320: cannot drop a column from a table with a check constraint
+
+db> guarded: column b renamed to c
+
+db> 
+db> 
+db> people: column flag added
+
+db> id | flag
+1 | 0
+2 | 0
+3 | 0
+(3 rows)
+
+db> 

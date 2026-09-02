@@ -245,6 +245,37 @@ int dropTable(const char* name)
 }
 
 /*
+ * Renames a table. The catalog is a hash table keyed on the name, so the node
+ * has to leave one bucket and join another - changing the name in place would
+ * leave it where findTable can no longer reach it.
+ */
+int renameTableInCatalog(const char* from, const char* to)
+{
+    if (findTable(to) != NULL)
+        return ERROR_SEMANTIC_TABLE_EXISTS;
+
+    CatalogNode** buckets = catalog[currentDatabaseId()];
+    CatalogNode** link    = &buckets[hashName(from)];
+
+    while (*link != NULL) {
+        if (_stricmp((*link)->table, from) == ZERO) {
+            CatalogNode* node = *link;
+
+            *link = node->next;                 /* out of the old bucket */
+            snprintf(node->table, NAME_LEN, "%s", to);
+
+            unsigned int bucket = hashName(to);   /* and into the new one */
+            node->next        = buckets[bucket];
+            buckets[bucket]   = node;
+            return SUCCESS_CODE;
+        }
+        link = &(*link)->next;
+    }
+
+    return ERROR_SEMANTIC_TABLE_NOT_FOUND;
+}
+
+/*
  * Collects every table in the current database. Order follows the hash buckets.
  */
 int listTables(const CatalogNode** out, int max)
