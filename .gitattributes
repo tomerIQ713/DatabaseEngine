@@ -1,0 +1,18 @@
+# Default: normalise text to LF in the repository.
+* text=auto
+
+# These must be LF in the working tree on every platform. A shell script
+# checked out with CRLF fails on Linux with "bad interpreter: /bin/sh^M",
+# which is exactly how CI would break.
+*.sh   text eol=lf
+*.py   text eol=lf
+
+# Golden baselines are compared byte for byte after CR is stripped; keeping
+# them LF everywhere means the comparison is the same on every platform.
+*.sql      text eol=lf
+*.expected text eol=lf
+
+# Keep Visual Studio files as Windows tools expect them.
+*.vcxproj         text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.slnx            text eol=crlf
