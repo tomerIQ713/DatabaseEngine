@@ -858,6 +858,21 @@ static int replaceFile(const char* from, const char* to)
 
 /* The file the pool is faulting pages in from, so a save can tell whether it is
    about to replace the ground it is standing on. */
+/*
+ * Set by the controller when a statement changed the schema rather than any
+ * row. CREATE TABLE with no rows in it, DROP TABLE, ALTER, CREATE INDEX on an
+ * empty table: each changes the catalog and dirties no page, so without this
+ * the commit below would see nothing to do and the change would live only in
+ * memory - lost at the next ROLLBACK, and lost in a crash after the statement
+ * had already reported success.
+ */
+static int schemaChanged;
+
+void markSchemaChanged(void)
+{
+    schemaChanged = ONE;
+}
+
 static char openPath[LINE_LEN];
 static int  catalogRoot = (int)INVALID_CATALOG;
 
@@ -1101,6 +1116,9 @@ int rollbackTransaction(void)
     if (!transactionOpen)
         return ERROR_EXEC_NO_TRANSACTION;
 
+    /* Whatever the schema was, the file is about to say. */
+    schemaChanged = ZERO;
+
     if (openPath[ZERO] == '\0')                 /* :memory:, or a legacy file */
         return ERROR_EXEC_CANNOT_ROLLBACK;
 
@@ -1122,6 +1140,7 @@ int rollbackTransaction(void)
     return hadLog ? openForWrite(path) : SUCCESS_CODE;
 }
 
+
 /*
  * Puts the catalog into its pages and commits everything the statement touched.
  *
@@ -1131,7 +1150,7 @@ int rollbackTransaction(void)
  */
 int commitDatabase(void)
 {
-    if (!walIsOpen() || !poolHasDirty())
+    if (!walIsOpen() || (!poolHasDirty() && !schemaChanged))
         return SUCCESS_CODE;
 
     Buffer blob = { NULL, ZERO, ZERO };
@@ -1147,7 +1166,13 @@ int commitDatabase(void)
         return errorCode;
 
     poolSetCatalogRoot(catalogRoot);
-    return poolCommit();
+
+    errorCode = poolCommit();
+
+    if (errorCode == SUCCESS_CODE)
+        schemaChanged = ZERO;               /* it is in the log now */
+
+    return errorCode;
 }
 
 /*

@@ -220,6 +220,41 @@ served=$(printf 'select * from t;\n.exit\n' | "$db" "$bad" 2>/dev/null \
          | tr -d '\r' | grep -c 'alpha')
 check "and its rows are not handed out" "0" "$served"
 
+# --- a schema change with no rows in it is still committed -------------------
+# CREATE TABLE on its own dirties no page, so a commit that only looks for
+# dirty pages finds nothing to do and the table lives only in memory. It then
+# vanishes at the next ROLLBACK, and vanishes in a crash after the statement
+# has already reported success - which is the promise this engine exists to
+# keep.
+empty="$work/e.db"
+printf 'create table seed (i int);\ninsert into seed values (1);\n.exit\n' \
+    | "$db" "$empty" > /dev/null 2>&1
+
+kept=$(printf 'create table lonely (i int);\nbegin;\nrollback;\n.tables\n.exit\n' \
+       | "$db" "$empty" 2>&1 | tr -d '\r' | grep -c '^lonely(')
+check "a table with no rows survives a rollback" "1" "$kept"
+
+# and the same thing with the engine killed instead of asked to roll back.
+#
+# CREATE TABLE must be the only statement in this session. Anything that
+# touches a page leaves the pool dirty, and the next commit then writes the
+# whole catalog - carrying the table along with it and hiding the bug.
+crashed="$work/x.db"
+printf 'create table seed (i int);\ninsert into seed values (1);\n.exit\n' \
+    | "$db" "$crashed" > /dev/null 2>&1
+
+{
+    printf 'create table ghost (i int);\n'
+    sleep 30
+} | "$db" "$crashed" > /dev/null 2>&1 &
+
+sleep 3
+kill_engine
+
+survived=$(printf '.tables\n.exit\n' | "$db" "$crashed" 2>&1 \
+           | tr -d '\r' | grep -c '^ghost(')
+check "and survives a crash, having reported success" "1" "$survived"
+
 # --- a schema change is transactional too ------------------------------------
 # ALTER changes the catalog in memory as well as on the page, and ROLLBACK puts
 # it back by re-reading the catalog - the same reload that restores the rows.

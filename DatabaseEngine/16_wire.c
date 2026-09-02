@@ -28,6 +28,7 @@ typedef int WSADATA;
 
 #include "sql_common.h"
 #include <ctype.h>
+#include <time.h>
 
 /*
  * The PostgreSQL frontend/backend protocol, version 3, simple-query subset -
@@ -50,9 +51,9 @@ typedef int WSADATA;
  * pg_catalog, with joins and casts this engine does not have, so \d and its
  * relatives will not work. Typed SQL does.
  *
- * One connection at a time. The engine is a single set of globals - one
- * catalog, one pool, one open transaction - so serving two sessions at once
- * would be two sessions sharing one database's worth of state.
+ * Many connections, one statement at a time. Everything a connection owns is
+ * in a Session; the engine underneath is not - one catalog, one buffer pool,
+ * one log - so statements are run one after another rather than at once.
  */
 
 #define PROTOCOL_V3     196608u             /* 3.0, as the startup packet sends it */
@@ -68,28 +69,95 @@ typedef int WSADATA;
 
 #define WIRE_BUFFER 65536
 
-static SOCKET client = INVALID_SOCKET;
+#define MAX_PREPARED 8
+#define MAX_PARAMS   32
+
+typedef struct {
+    int  used;
+    char name[NAME_LEN];
+    char sql[LINE_LEN];
+    int  params;                            /* what Parse said it takes */
+    int  types[MAX_PARAMS];                 /* parameter OIDs, 0 when unsaid */
+} Prepared;
+
+/*
+ * One portal per session. A second one within a session would need its own
+ * result set, and nothing this engine can do with two at once is worth the
+ * copy.
+ */
+typedef struct {
+    int       used;
+    char      name[NAME_LEN];
+    char      sql[LINE_LEN];                /* parameters already filled in */
+    int       executed;
+    int       sent;                         /* rows already handed over */
+    ResultSet result;
+} Portal;
+
+/*
+ * Concurrent connections.
+ *
+ * Everything a connection owns lives in a Session, and `self` is whichever one
+ * is being served right now. What is deliberately *not* per-session is the
+ * engine underneath: one catalog, one buffer pool, one write-ahead log. So the
+ * server accepts many clients and runs their statements one at a time.
+ *
+ * ponytail: a single-threaded select loop rather than a thread per connection.
+ * The ceiling is throughput, not correctness - statements do not overlap, so
+ * there is no shared state to race on and no lock to get wrong. Read
+ * concurrency is the upgrade when that ceiling is the thing that hurts, and it
+ * needs the pool and the catalog made re-entrant first.
+ */
+#define MAX_SESSIONS 16
+
+/* A session may need to keep the engine across several messages - a
+   transaction spans statements, and a suspended portal holds rows that live in
+   the statement arena, which the next statement winds back. Long enough that a
+   real transaction is never cut short; short enough that a client which
+   vanishes mid-transaction cannot hold the engine forever. */
+#define HOLD_TIMEOUT_SECONDS 30
+
+typedef struct Session {
+    SOCKET        socket;
+    int           handshakeDone;
+    unsigned char out[WIRE_BUFFER];
+    size_t        outUsed;
+    Prepared      prepared[MAX_PREPARED];
+    Portal        portal;
+    /* Everything after an error is skipped until Sync, which is what the
+       protocol says and what clients expect: they send a whole batch and then
+       look. */
+    int           ignoringUntilSync;
+    int           databaseId;               /* where USE left this session */
+    time_t        lastActive;
+} Session;
+
+static Session* sessions[MAX_SESSIONS];
+static Session* self;                       /* the one being served right now */
+
+/* The session that is mid-transaction or holding undelivered rows, or -1.
+   While one holds, the others are simply not read from: their messages wait in
+   the socket until it lets go. */
+static int holder = -ONE;
 
 /* ---------- bytes on the wire ---------- */
-
-static unsigned char outBytes[WIRE_BUFFER];
-static size_t        outUsed;
 
 static int flushWire(void)
 {
     size_t at = ZERO;
 
-    while (at < outUsed) {
-        int sent = send(client, (const char*)outBytes + at, (int)(outUsed - at), ZERO);
+    while (at < self->outUsed) {
+        int sent = send(self->socket, (const char*)self->out + at,
+                        (int)(self->outUsed - at), ZERO);
 
         if (sent <= ZERO) {
-            outUsed = ZERO;
+            self->outUsed = ZERO;
             return ERROR_IO_WRITE;
         }
         at += (size_t)sent;
     }
 
-    outUsed = ZERO;
+    self->outUsed = ZERO;
     return SUCCESS_CODE;
 }
 
@@ -104,7 +172,7 @@ static int putBytes(const void* bytes, size_t length)
         size_t at = ZERO;
 
         while (at < length) {
-            int sent = send(client, (const char*)bytes + at, (int)(length - at), ZERO);
+            int sent = send(self->socket, (const char*)bytes + at, (int)(length - at), ZERO);
 
             if (sent <= ZERO)
                 return ERROR_IO_WRITE;
@@ -113,15 +181,15 @@ static int putBytes(const void* bytes, size_t length)
         return SUCCESS_CODE;
     }
 
-    if (outUsed + length > WIRE_BUFFER) {
+    if (self->outUsed + length > WIRE_BUFFER) {
         int errorCode = flushWire();
 
         if (errorCode != SUCCESS_CODE)
             return errorCode;
     }
 
-    memcpy(outBytes + outUsed, bytes, length);
-    outUsed += length;
+    memcpy(self->out + self->outUsed, bytes, length);
+    self->outUsed += length;
     return SUCCESS_CODE;
 }
 
@@ -155,7 +223,7 @@ static int readExactly(unsigned char* into, size_t length)
     size_t at = ZERO;
 
     while (at < length) {
-        int got = recv(client, (char*)into + at, (int)(length - at), ZERO);
+        int got = recv(self->socket, (char*)into + at, (int)(length - at), ZERO);
 
         if (got <= ZERO)
             return ERROR_IO_CANNOT_OPEN;
@@ -563,37 +631,7 @@ static int runQuery(const char* sql, ResultSet* results)
  * how a parameter is spelled, which is where the type has to be guessed.
  */
 
-#define MAX_PREPARED 8
-#define MAX_PARAMS   32
-
-typedef struct {
-    int  used;
-    char name[NAME_LEN];
-    char sql[LINE_LEN];
-    int  params;                            /* what Parse said it takes */
-    int  types[MAX_PARAMS];                 /* parameter OIDs, 0 when unsaid */
-} Prepared;
-
-static Prepared prepared[MAX_PREPARED];
-
-/*
- * One portal. A second one would need its own result set, and nothing this
- * engine can do with two at once is worth the copy.
- */
-static struct {
-    int       used;
-    char      name[NAME_LEN];
-    char      sql[LINE_LEN];                /* parameters already filled in */
-    int       executed;
-    int       sent;                         /* rows already handed over */
-    ResultSet result;
-} portal;
-
-/*
- * Everything after an error is skipped until Sync, which is what the protocol
- * says and what clients expect: they send a whole batch and then look.
- */
-static int ignoringUntilSync;
+/* The types these use are declared with the session, above. */
 
 /* ---------- reading a message body ---------- */
 
@@ -646,8 +684,8 @@ static int bodyI32(Body* body, int* out)
 static Prepared* findPrepared(const char* name)
 {
     for (int i = ZERO; i < MAX_PREPARED; i++)
-        if (prepared[i].used && strcmp(prepared[i].name, name) == ZERO)
-            return &prepared[i];
+        if (self->prepared[i].used && strcmp(self->prepared[i].name, name) == ZERO)
+            return &self->prepared[i];
     return NULL;
 }
 
@@ -661,10 +699,10 @@ static Prepared* claimPrepared(const char* name)
         return existing;
 
     for (int i = ZERO; i < MAX_PREPARED; i++)
-        if (!prepared[i].used) {
-            prepared[i].used = ONE;
-            snprintf(prepared[i].name, NAME_LEN, "%s", name);
-            return &prepared[i];
+        if (!self->prepared[i].used) {
+            self->prepared[i].used = ONE;
+            snprintf(self->prepared[i].name, NAME_LEN, "%s", name);
+            return &self->prepared[i];
         }
 
     return NULL;
@@ -846,7 +884,7 @@ static int sendSimple(char type)
 
 static int failExtended(int code)
 {
-    ignoringUntilSync = ONE;
+    self->ignoringUntilSync = ONE;
     return sendError(code);
 }
 
@@ -939,15 +977,15 @@ static int handleBind(Body* body)
     }
 
     int errorCode = substituteParameters(statement->sql, statement, values,
-                                         lengths, count, ZERO, portal.sql,
-                                         sizeof portal.sql);
+                                         lengths, count, ZERO, self->portal.sql,
+                                         sizeof self->portal.sql);
     if (errorCode != SUCCESS_CODE)
         return failExtended(errorCode);
 
-    snprintf(portal.name, NAME_LEN, "%s", name);
-    portal.used     = ONE;
-    portal.executed = ZERO;
-    portal.sent     = ZERO;
+    snprintf(self->portal.name, NAME_LEN, "%s", name);
+    self->portal.used     = ONE;
+    self->portal.executed = ZERO;
+    self->portal.sent     = ZERO;
 
     return sendSimple('2');                     /* BindComplete */
 }
@@ -962,18 +1000,18 @@ static int handleBind(Body* body)
  */
 static int runPortal(void)
 {
-    if (!portal.used)
+    if (!self->portal.used)
         return ERROR_SEMANTIC_TABLE_NOT_FOUND;
-    if (portal.executed)
+    if (self->portal.executed)
         return SUCCESS_CODE;
 
-    int errorCode = ProcessStatement(portal.sql, &portal.result);
+    int errorCode = ProcessStatement(self->portal.sql, &self->portal.result);
 
     if (errorCode != SUCCESS_CODE)
         return errorCode;
 
-    portal.executed = ONE;
-    portal.sent     = ZERO;
+    self->portal.executed = ONE;
+    self->portal.sent     = ZERO;
     return SUCCESS_CODE;
 }
 
@@ -1074,10 +1112,10 @@ static int handleDescribe(Body* body)
     if (errorCode != SUCCESS_CODE)
         return failExtended(errorCode);
 
-    if (portal.result.ncols == ZERO)
+    if (self->portal.result.ncols == ZERO)
         return sendSimple('n');                 /* NoData */
 
-    return sendRowDescription(&portal.result);
+    return sendRowDescription(&self->portal.result);
 }
 
 static int handleExecute(Body* body)
@@ -1094,28 +1132,28 @@ static int handleExecute(Body* body)
     if (errorCode != SUCCESS_CODE)
         return failExtended(errorCode);
 
-    int last = portal.result.nrows;
+    int last = self->portal.result.nrows;
 
-    if (limit > ZERO && portal.sent + limit < last)
-        last = portal.sent + limit;
+    if (limit > ZERO && self->portal.sent + limit < last)
+        last = self->portal.sent + limit;
 
-    for (int r = portal.sent; r < last; r++) {
-        errorCode = sendDataRow(&portal.result.rows[r], portal.result.ncols);
+    for (int r = self->portal.sent; r < last; r++) {
+        errorCode = sendDataRow(&self->portal.result.rows[r], self->portal.result.ncols);
 
         if (errorCode != SUCCESS_CODE)
             return errorCode;
     }
 
-    portal.sent = last;
+    self->portal.sent = last;
 
     /* More rows waiting means the portal is suspended rather than finished,
        and the client will ask again. */
-    if (portal.sent < portal.result.nrows)
+    if (self->portal.sent < self->portal.result.nrows)
         return sendSimple('s');                 /* PortalSuspended */
 
     char tag[NAME_LEN + 32];
 
-    commandTag(portal.sql, &portal.result, tag, sizeof tag);
+    commandTag(self->portal.sql, &self->portal.result, tag, sizeof tag);
 
     startMessage();
     addCString(tag);
@@ -1141,23 +1179,12 @@ static int handleClose(Body* body)
         if (statement != NULL)
             statement->used = ZERO;
     }
-    else if (portal.used && strcmp(portal.name, name) == ZERO) {
-        portal.used     = ZERO;
-        portal.executed = ZERO;
+    else if (self->portal.used && strcmp(self->portal.name, name) == ZERO) {
+        self->portal.used     = ZERO;
+        self->portal.executed = ZERO;
     }
 
     return sendSimple('3');                     /* CloseComplete */
-}
-
-static void resetExtended(void)
-{
-    for (int i = ZERO; i < MAX_PREPARED; i++)
-        prepared[i].used = ZERO;
-
-    portal.used     = ZERO;
-    portal.executed = ZERO;
-    portal.sent     = ZERO;
-    ignoringUntilSync = ZERO;
 }
 
 /* ---------- connection ---------- */
@@ -1201,7 +1228,10 @@ static int handshake(void)
             continue;
         }
 
-        if (version == CANCEL_REQUEST)          /* nothing to cancel: one session */
+        /* Cancellation would have to interrupt a statement already running,
+           and statements do not overlap here - the request is refused rather
+           than silently ignored. */
+        if (version == CANCEL_REQUEST)
             return ERROR_IO_CANNOT_OPEN;
 
         if (version != PROTOCOL_V3)
@@ -1246,88 +1276,136 @@ static int handshake(void)
 /*
  * One session, until the client says Terminate or drops.
  */
-static void serveConnection(ResultSet* results)
+/*
+ * One message from one session. Returns SUCCESS_CODE while the connection is
+ * still good; anything else means it is finished and should be closed.
+ *
+ * The read is blocking once the socket says it has something: a message can
+ * span packets, and assembling it here is far simpler than keeping a partial
+ * message per session. A client that sends half a message and stalls therefore
+ * stalls the server, which is the honest cost of not writing a state machine.
+ */
+static int serveMessage(ResultSet* results)
 {
-    if (handshake() != SUCCESS_CODE)
-        return;
+    unsigned char header[5];
 
-    for (;;) {
-        unsigned char header[5];
+    if (readExactly(header, 5) != SUCCESS_CODE)
+        return ERROR_IO_CANNOT_OPEN;
 
-        if (readExactly(header, 5) != SUCCESS_CODE)
-            return;
+    char         type   = (char)header[ZERO];
+    unsigned int length = readU32(header + ONE);
 
-        char         type   = (char)header[ZERO];
-        unsigned int length = readU32(header + ONE);
+    if (length < 4 || length > WIRE_BUFFER)
+        return ERROR_IO_BAD_FORMAT;
 
-        if (length < 4 || length > WIRE_BUFFER)
-            return;
+    static unsigned char body[WIRE_BUFFER];
 
-        static unsigned char body[WIRE_BUFFER];
+    body[ZERO] = ZERO;
+    if (length > 4 && readExactly(body, length - 4) != SUCCESS_CODE)
+        return ERROR_IO_CANNOT_OPEN;
 
-        body[ZERO] = ZERO;
-        if (length > 4 && readExactly(body, length - 4) != SUCCESS_CODE)
-            return;
+    body[length - 4] = ZERO;                /* the string is NUL-terminated */
 
-        body[length - 4] = ZERO;                /* the string is NUL-terminated */
+    if (type == 'X')                        /* Terminate */
+        return ERROR_IO_CANNOT_OPEN;
 
-        if (type == 'X')                        /* Terminate */
-            return;
+    Body reader = { body, length - 4, ZERO };
 
-        Body reader = { body, length - 4, ZERO };
+    /* After an error the protocol says to skip to the next Sync, and
+       clients rely on it: they send a whole batch and then look. */
+    if (self->ignoringUntilSync && type != 'S')
+        return SUCCESS_CODE;
 
-        /* After an error the protocol says to skip to the next Sync, and
-           clients rely on it: they send a whole batch and then look. */
-        if (ignoringUntilSync && type != 'S')
-            continue;
+    int errorCode = SUCCESS_CODE;
 
-        int errorCode = SUCCESS_CODE;
+    switch (type) {
+    case 'Q':
+        /*
+         * A simple query destroys the unnamed portal, which the protocol
+         * says and this engine needs: a result's text lives in the
+         * statement arena, and running anything else winds that arena
+         * back. Rows kept from an earlier Execute would be pointing at
+         * memory the next statement has already reused.
+         */
+        self->portal.used     = ZERO;
+        self->portal.executed = ZERO;
 
-        switch (type) {
-        case 'Q':
-            /*
-             * A simple query destroys the unnamed portal, which the protocol
-             * says and this engine needs: a result's text lives in the
-             * statement arena, and running anything else winds that arena
-             * back. Rows kept from an earlier Execute would be pointing at
-             * memory the next statement has already reused.
-             */
-            portal.used     = ZERO;
-            portal.executed = ZERO;
-
-            errorCode = runQuery((const char*)body, results);
-            if (errorCode == SUCCESS_CODE)
-                errorCode = sendReadyForQuery();
-            break;
-
-        case 'P': errorCode = handleParse(&reader);    break;
-        case 'B': errorCode = handleBind(&reader);     break;
-        case 'D': errorCode = handleDescribe(&reader); break;
-        case 'E': errorCode = handleExecute(&reader);  break;
-        case 'C': errorCode = handleClose(&reader);    break;
-
-        case 'H':                               /* Flush */
-            errorCode = flushWire();
-            break;
-
-        case 'S':                               /* Sync ends the batch */
-            ignoringUntilSync = ZERO;
+        errorCode = runQuery((const char*)body, results);
+        if (errorCode == SUCCESS_CODE)
             errorCode = sendReadyForQuery();
-            break;
+        break;
 
-        default:
-            errorCode = failExtended(ERROR_SYNTAX_INVALID_STATEMENT);
-            break;
-        }
+    case 'P': errorCode = handleParse(&reader);    break;
+    case 'B': errorCode = handleBind(&reader);     break;
+    case 'D': errorCode = handleDescribe(&reader); break;
+    case 'E': errorCode = handleExecute(&reader);  break;
+    case 'C': errorCode = handleClose(&reader);    break;
 
-        if (errorCode != SUCCESS_CODE)
-            return;
+    case 'H':                               /* Flush */
+        errorCode = flushWire();
+        break;
+
+    case 'S':                               /* Sync ends the batch */
+        self->ignoringUntilSync = ZERO;
+        errorCode = sendReadyForQuery();
+        break;
+
+    default:
+        errorCode = failExtended(ERROR_SYNTAX_INVALID_STATEMENT);
+        break;
     }
+
+    return errorCode;
 }
 
 /*
- * Listens until killed, serving one client at a time.
+ * Listens until killed, serving many clients - one statement at a time.
  */
+
+/* A session lets go of the engine when it is neither in a transaction nor
+   holding rows a client has not collected yet. Both are reasons the next
+   statement must not run: a transaction spans statements, and a suspended
+   portal's rows live in the statement arena that the next statement winds
+   back. */
+static int stillHolding(const Session* session)
+{
+    return inTransaction()
+        || (session->portal.used && session->portal.executed
+            && session->portal.sent < session->portal.result.nrows);
+}
+
+static void closeSession(int index)
+{
+    Session* session = sessions[index];
+
+    if (session == NULL)
+        return;
+
+    if (holder == index) {
+        /* A session that ends mid-transaction has not committed it, and the
+           next one must not inherit it. */
+        if (inTransaction())
+            rollbackTransaction();
+        holder = -ONE;
+    }
+
+    closesocket(session->socket);
+    freeResultSet(&session->portal.result);
+    free(session);
+    sessions[index] = NULL;
+
+    printf("client disconnected\n");
+    fflush(stdout);
+}
+
+/* Makes the session current: its socket, its buffers, and the database USE
+   left it on. Everything below this call reads `self`. */
+static void selectSession(int index)
+{
+    self = sessions[index];
+    setCurrentDatabaseId(self->databaseId);
+}
+
 int serveWire(int port)
 {
     WSADATA         winsock;
@@ -1354,7 +1432,7 @@ int serveWire(int port)
     address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);    /* this machine only */
 
     if (bind(listener, (struct sockaddr*)&address, sizeof address) != ZERO
-        || listen(listener, ONE) != ZERO) {
+        || listen(listener, MAX_SESSIONS) != ZERO) {
         closesocket(listener);
         WSACleanup();
         return ERROR_IO_CANNOT_OPEN;
@@ -1364,29 +1442,130 @@ int serveWire(int port)
     fflush(stdout);
 
     for (;;) {
-        client = accept(listener, NULL, NULL);
+        fd_set  readable;
+        SOCKET  highest = listener;
+        struct timeval wait;
 
-        if (client == INVALID_SOCKET)
+        FD_ZERO(&readable);
+        FD_SET(listener, &readable);
+
+        /* While one session holds the engine, only it is read from. The others
+           are not refused - their messages simply sit in the socket until it
+           lets go, which is what makes a connection pool work rather than
+           fail. */
+        for (int i = ZERO; i < MAX_SESSIONS; i++) {
+            if (sessions[i] == NULL)
+                continue;
+            if (holder >= ZERO && holder != i)
+                continue;
+
+            FD_SET(sessions[i]->socket, &readable);
+
+            if (sessions[i]->socket > highest)
+                highest = sessions[i]->socket;
+        }
+
+        wait.tv_sec  = ONE;
+        wait.tv_usec = ZERO;
+
+        int ready = select((int)highest + ONE, &readable, NULL, NULL, &wait);
+
+        if (ready < ZERO)
             break;
 
-        printf("client connected\n");
-        fflush(stdout);
+        /* A holder that has gone quiet is let go of, or nothing else would
+           ever run again. Its transaction is rolled back, because a client
+           that stopped talking never committed it. */
+        if (ready == ZERO && holder >= ZERO && sessions[holder] != NULL
+            && time(NULL) - sessions[holder]->lastActive >= HOLD_TIMEOUT_SECONDS) {
 
-        outUsed = ZERO;
-        resetExtended();
-        serveConnection(&results);
+            printf("session %d idle in transaction, rolled back\n", holder);
+            fflush(stdout);
 
-        /* A session that ends mid-transaction has not committed it, and the
-           next client must not inherit it. */
-        if (inTransaction())
-            rollbackTransaction();
+            selectSession(holder);
+            closeSession(holder);
+            continue;
+        }
 
-        closesocket(client);
-        client = INVALID_SOCKET;
+        if (FD_ISSET(listener, &readable)) {
+            SOCKET incoming = accept(listener, NULL, NULL);
 
-        printf("client disconnected\n");
-        fflush(stdout);
+            if (incoming != INVALID_SOCKET) {
+                int slot = -ONE;
+
+                for (int i = ZERO; i < MAX_SESSIONS && slot < ZERO; i++)
+                    if (sessions[i] == NULL)
+                        slot = i;
+
+                Session* session = slot >= ZERO
+                                 ? (Session*)calloc(ONE, sizeof(Session)) : NULL;
+
+                if (session == NULL) {
+                    /* Out of slots or out of memory. Closing is the honest
+                       answer: the client sees a refused connection rather than
+                       a silence it has to time out. */
+                    closesocket(incoming);
+                }
+                else {
+                    /* calloc, so the session starts with no prepared
+                       statements, no portal, and nothing to skip to Sync -
+                       which is exactly what a new connection must look like. */
+                    session->socket     = incoming;
+                    session->databaseId = ZERO;
+                    session->lastActive = time(NULL);
+                    sessions[slot]      = session;
+
+                    printf("client connected\n");
+                    fflush(stdout);
+                }
+            }
+        }
+
+        for (int i = ZERO; i < MAX_SESSIONS; i++) {
+            if (sessions[i] == NULL || !FD_ISSET(sessions[i]->socket, &readable))
+                continue;
+
+            /* Asked again here, not just when the set was built: a session
+               served earlier in this same pass may have opened a transaction
+               since, and the rest must not run inside it. */
+            if (holder >= ZERO && holder != i)
+                continue;
+
+            selectSession(i);
+            self->lastActive = time(NULL);
+
+            int errorCode;
+
+            if (!self->handshakeDone) {
+                errorCode = handshake();
+
+                if (errorCode == SUCCESS_CODE)
+                    self->handshakeDone = ONE;
+            }
+            else {
+                errorCode = serveMessage(&results);
+            }
+
+            if (errorCode != SUCCESS_CODE) {
+                closeSession(i);
+                continue;
+            }
+
+            /* Whatever USE did belongs to this session and not to the next. */
+            self->databaseId = currentDatabaseId();
+
+            if (stillHolding(self))
+                holder = i;
+            else if (holder == i)
+                holder = -ONE;
+        }
     }
+
+    for (int i = ZERO; i < MAX_SESSIONS; i++)
+        if (sessions[i] != NULL) {
+            selectSession(i);
+            closeSession(i);
+        }
 
     freeResultSet(&results);
     closesocket(listener);

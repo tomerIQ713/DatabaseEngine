@@ -134,7 +134,9 @@ unmatched row correctly counts zero, and `ON` and `WHERE` on an outer join mean
 different things.
 
 **Wire protocol.** PostgreSQL v3, both the simple and the extended query
-protocol.
+protocol, with up to 16 concurrent connections. Each has its own prepared
+statements, portal and current database; statements are serialised, and a
+transaction blocks the others until it commits.
 
 ## Measured
 
@@ -166,11 +168,12 @@ are in the design notes below.
 
 Worth knowing before you reach for it:
 
-- **One connection at a time.** The engine is a single set of globals - one
-  catalog, one buffer pool, one open transaction - so two sessions at once
-  would be two sessions sharing one database's worth of state. This is the
-  real distance between it and a production database, and it is larger than
-  any missing SQL.
+- **One statement at a time.** Up to 16 connections can be open at once - a
+  connection pool works - but their statements are run one after another, not
+  in parallel. The engine underneath is one catalog, one buffer pool and one
+  log, so the ceiling is throughput rather than correctness. A transaction
+  holds the engine until it commits; other sessions wait rather than being
+  refused.
 - **No correlated subqueries.** An uncorrelated one is run once before the
   outer query starts; a correlated one would have to be re-run per row, inside
   a scan already using the executor's shared state. It is refused with an
@@ -188,8 +191,8 @@ Worth knowing before you reach for it:
 
 ```bash
 ./tests/run.sh ./db          # 33 golden-file tests
-./tests/recovery.sh ./db     # 18 crash-recovery tests (kills the process mid-session)
-./tests/wire.sh ./db         # 30 protocol tests (needs python3)
+./tests/recovery.sh ./db     # 20 crash-recovery tests (kills the process mid-session)
+./tests/wire.sh ./db         # 49 protocol and concurrency tests (needs python3)
 ./tests/bench.sh ./db        # the table above
 ```
 

@@ -13,6 +13,7 @@ Run through tests/wire.sh, which starts the engine first.
 import socket
 import struct
 import sys
+import time
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 5433
 
@@ -284,6 +285,85 @@ check("and the session carries on after it",
 
 sock.sendall(b"X" + struct.pack("!I", 4))
 sock.close()
+
+# ---------------------------------------------------------------------------
+# Several connections at once.
+#
+# The engine runs one statement at a time, but a connection pool needs all of
+# its connections to be open at once - which is the thing that did not work
+# before sessions existed.
+# ---------------------------------------------------------------------------
+import threading
+
+many = [connect() for _ in range(4)]
+
+check("four connections are open at the same time", 4, len(many))
+
+query(many[0], "create table conc (id int, who text)")
+for i, one in enumerate(many):
+    query(one, "insert into conc values (%d, 'c%d')" % (i, i))
+
+check("each connection sees what the others committed",
+      [[("D", ["4"])]] * 4,
+      [[m for m in query(one, "select count(*) from conc") if m[0] == "D"]
+       for one in many])
+
+# Each session remembers its own current database, so USE on one does not move
+# the others.
+query(many[0], "create database sideways")
+query(many[0], "use sideways")
+query(many[0], "create table only_here (x int)")
+
+check("USE moves only the session that ran it",
+      ("C", "SELECT 1"),
+      [m for m in query(many[0], "select count(*) from only_here")
+       if m[0] == "C"][0])
+
+check("and the others are still where they were",
+      [("D", ["4"])],
+      [m for m in query(many[1], "select count(*) from conc") if m[0] == "D"])
+
+check("a table in another database is not visible from here",
+      "no such table",
+      [m[1] for m in query(many[0], "select * from conc") if m[0] == "E"][0])
+
+query(many[0], "use main")
+
+# A transaction holds the engine: another session's statement waits for the
+# COMMIT rather than running inside the transaction or being refused.
+timeline = []
+
+
+def holder():
+    query(many[0], "begin")
+    query(many[0], "insert into conc values (900, 'tx')")
+    timeline.append("inserted")
+    time.sleep(1.5)
+    query(many[0], "commit")
+    timeline.append("committed")
+
+
+def waiter():
+    time.sleep(0.4)                       # once the transaction is under way
+    timeline.append("asked")
+    rows = [m for m in query(many[2], "select count(*) from conc") if m[0] == "D"]
+    timeline.append("answered")
+    waiter.rows = rows
+
+
+first = threading.Thread(target=holder)
+second = threading.Thread(target=waiter)
+first.start(); second.start()
+first.join(); second.join()
+
+check("a waiting session is answered only after the commit",
+      ["inserted", "asked", "committed", "answered"], timeline)
+
+check("and then sees the committed row", [("D", ["5"])], waiter.rows)
+
+for one in many:
+    one.sendall(b"X" + struct.pack("!I", 4))
+    one.close()
 
 print("%d passed, %d failed" % (passed, failed))
 sys.exit(1 if failed else 0)

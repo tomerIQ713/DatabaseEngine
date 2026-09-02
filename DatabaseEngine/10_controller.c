@@ -67,6 +67,21 @@ int ProcessStatement(const char* sql, ResultSet* out)
     if (errorCode != SUCCESS_CODE)
         return errorCode;
 
+    /* A schema change need not touch a single page - CREATE TABLE with no rows
+       does not - and the commit below stops early when nothing is dirty. Said
+       once here rather than in each of the statements, because the cost of
+       missing one is a change that reported success and was not kept. */
+    switch (statement.type) {
+    case STMT_CREATE_TABLE:  case STMT_DROP_TABLE:
+    case STMT_CREATE_INDEX:  case STMT_DROP_INDEX:
+    case STMT_ALTER_TABLE:   case STMT_VACUUM:
+    case STMT_CREATE_DATABASE: case STMT_DROP_DATABASE:
+        markSchemaChanged();
+        break;
+    default:
+        break;
+    }
+
     if (poolCorruptCount() != damaged)
         return ERROR_IO_CHECKSUM;
 

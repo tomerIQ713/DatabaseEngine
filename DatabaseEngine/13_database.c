@@ -31,6 +31,17 @@ void initDatabases(void)
     current    = ZERO;
 }
 
+/*
+ * A session remembers which database USE left it on, and puts it back before
+ * each of its statements - so two connections can sit in different databases
+ * without either seeing the other move.
+ */
+void setCurrentDatabaseId(int id)
+{
+    if (id >= ZERO && id < MAX_DATABASES && used[id])
+        current = id;
+}
+
 int findDatabase(const char* name)
 {
     for (int i = ZERO; i < MAX_DATABASES; i++)

@@ -212,6 +212,22 @@ the log on the next open; a crash before it loses the statement whole. Nothing
 partial survives — frames past the last commit marker are a torn transaction and
 are skipped, and a frame whose checksum fails ends the replay.
 
+**A schema change need not touch a page, and must be committed anyway.**
+`commitDatabase` stops early when nothing is dirty, which is what keeps a
+SELECT from paying an fsync - but `CREATE TABLE` with no rows in it, `DROP
+TABLE`, `ALTER`, and `CREATE INDEX` on an empty table all change the catalog
+and dirty no page. Without saying so they lived only in memory: lost at the
+next ROLLBACK, and lost in a crash *after the statement had reported success*,
+which is the one promise this engine exists to keep.
+
+`ProcessStatement` calls `markSchemaChanged` for those statement types, and
+`commitDatabase` treats it as a reason to run. It is said once, in the
+controller, rather than in each executor: the cost of missing one is a change
+that was acknowledged and not kept. The bug is easy to hide from a test -
+anything that dirties a page in the same session carries the whole catalog
+along with it - so `tests/recovery.sh` crashes a session whose only statement
+is the bare `CREATE TABLE`.
+
 Frames carry **whole pages**, not diffs. That costs log volume and buys
 idempotent replay, so recovery needs no undo pass.
 
@@ -843,10 +859,39 @@ The stand-ins are not NULL, because `id >= NULL` is refused by the parser on
 purpose. They are a literal chosen from the declared parameter type, and when
 nothing was declared - pg8000 declares nothing - the candidates are tried in
 turn until the statement parses. A probe therefore costs a scan, and a
-parameterised query is run twice. And **one connection is
-served at a time**, because the engine is a single set of globals - one catalog,
-one pool, one open transaction - so two sessions at once would be two sessions
-sharing one database's worth of state.
+parameterised query is run twice.
+
+**Many connections, one statement at a time.** Everything a connection owns -
+socket, output buffer, prepared statements, portal, and the database USE left
+it on - lives in a `Session`, and `self` is whichever one is being served.
+What is deliberately *not* per-session is the engine: one catalog, one buffer
+pool, one log. So `serveWire` is a `select` loop that accepts up to
+`MAX_SESSIONS` clients and runs their statements one after another.
+
+That shape is the point. Statements never overlap, so there is no shared state
+to race on and no lock to get wrong; the ceiling is throughput, not
+correctness. Read concurrency is the upgrade when that ceiling is what hurts,
+and it needs the pool and the catalog made re-entrant first.
+
+Four things hold it together, and `tests/wire.py` pins each:
+
+- **A session may need to keep the engine across several messages.** A
+  transaction spans statements, and a suspended portal holds rows that live in
+  the statement arena - which the next statement winds back. `stillHolding`
+  asks both questions, and while one session holds, the others are simply not
+  read from: their messages wait in the socket. They are not refused, which is
+  what makes a connection pool work rather than fail.
+- **A holder that goes quiet is let go of** after `HOLD_TIMEOUT_SECONDS`, and
+  its transaction is rolled back - a client that stopped talking never
+  committed it. Without that, one abandoned BEGIN wedges the server forever.
+- **`USE` belongs to the session that ran it.** `currentDatabaseId` is read
+  back after every message and restored before the next, so two connections
+  sit in different databases without either seeing the other move.
+- **A session starts clean** because it is `calloc`ed: no prepared statements,
+  no portal, nothing to skip to Sync.
+
+A seventeenth connection is closed rather than queued, so a client sees a
+refusal instead of a silence it has to time out.
 
 `winsock2.h` drags in `winnt.h`, which has an enumerator called `TokenType`, and
 so does the lexer. The file renames the Windows one with a `#define` before the
