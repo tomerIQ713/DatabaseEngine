@@ -1,0 +1,149 @@
+in-memory only, nothing will be saved
+
+db> 
+db> table readings created with 4 column(s)
+
+db> 
+db> 1 row inserted into readings
+
+db> 1 row inserted into readings
+
+db> 1 row inserted into readings
+
+db> 1 row inserted into readings
+
+db> id | taken | celsius | note
+1 | 2024-01-31 | 3.5 | cold
+2 | 2024-02-29 | -1.25 | freezing
+3 | 2023-12-25 | 20 | warm
+4 | 2024-06-01 | NULL | NULL
+(4 rows)
+
+db> 
+db> 
+db> id | celsius
+1 | 3.5
+3 | 20
+(2 rows)
+
+db> id | taken
+1 | 2024-01-31
+2 | 2024-02-29
+4 | 2024-06-01
+(3 rows)
+
+db> id | taken
+3 | 2023-12-25
+1 | 2024-01-31
+2 | 2024-02-29
+4 | 2024-06-01
+(4 rows)
+
+db> id | taken
+4 | 2024-06-01
+2 | 2024-02-29
+1 | 2024-01-31
+3 | 2023-12-25
+(4 rows)
+
+db> 
+db> 
+db> error 317: not a date: expected 'YYYY-MM-DD'
+
+db> error 317: not a date: expected 'YYYY-MM-DD'
+
+db> error 317: not a date: expected 'YYYY-MM-DD'
+
+db> error 317: not a date: expected 'YYYY-MM-DD'
+
+db> 
+db> 
+db> error 414: text is longer than the column allows
+
+db> 1 row inserted into readings
+
+db> 
+db> 
+db> avg(celsius) | sum(celsius) | min(celsius) | max(celsius) | count(celsius)
+5.8125 | 23.25 | -1.25 | 20 | 4
+(1 row)
+
+db> avg(id) | sum(id)
+3 | 15
+(1 row)
+
+db> avg(celsius)
+NULL
+(1 row)
+
+db> 
+db> 
+db> table sales created with 2 column(s)
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> region | avg(amount) | sum(amount)
+south | 10 | 10
+north | 1.875 | 3.75
+(2 rows)
+
+db> 
+db> 
+db> error 303: type mismatch
+
+db> 
+db> 
+db> index readings_c created on readings(celsius), 5 row(s) indexed
+
+db> index readings_t created on readings(taken), 5 row(s) indexed
+
+db> --- indexes (main) ---
+readings_t on readings(taken): 5 key(s), depth 1
+readings_c on readings(celsius): 4 key(s), depth 1
+
+db> 
+db> [index scan: readings_c on readings(celsius)]
+id
+3
+(1 row)
+
+db> [index scan: readings_c on readings(celsius)]
+id
+5
+1
+3
+(3 rows)
+
+db> [index scan: readings_t on readings(taken)]
+id
+1
+(1 row)
+
+db> [index scan: readings_t on readings(taken)]
+id
+3
+(1 row)
+
+db> 
+db> 
+db> 
+db> 
+db> id
+1
+3
+5
+(3 rows)
+
+db> index readings_c dropped
+
+db> id
+1
+3
+5
+(3 rows)
+
+db> 

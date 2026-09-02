@@ -1,0 +1,51 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> name | amount
+a | 10
+b | NULL
+NULL | 30
+NULL | NULL
+a | 5
+(5 rows)
+
+db> name | amount
+b | NULL
+NULL | NULL
+(2 rows)
+
+db> name | amount
+a | 10
+NULL | 30
+a | 5
+(3 rows)
+
+db> name | amount
+a | 10
+NULL | 30
+(2 rows)
+
+db> error 213: expected NULL after IS
+
+db> count(*) | count(amount) | sum(amount) | min(amount) | max(amount)
+5 | 3 | 45 | 5 | 30
+(1 row)
+
+db> name | count(*) | count(amount) | sum(amount)
+a | 2 | 2 | 15
+b | 1 | 0 | NULL
+NULL | 2 | 1 | 30
+(3 rows)
+
+db> 

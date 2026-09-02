@@ -1,0 +1,125 @@
+in-memory only, nothing will be saved
+
+db> 
+db> 
+db> table users created with 5 column(s)
+
+db> --- catalog (main) ---
+users(id int primary key, email text unique, name varchar(6) not null, role text default, age int default) check
+
+db> --- indexes (main) ---
+users_email_key on users(email): 0 key(s), depth 1
+users_id_key on users(id): 0 key(s), depth 1
+
+db> 
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> id | email | name | role | age
+1 | a@x | ada | admin | 36
+2 | b@x | bo | user | 0
+3 | NULL | cy | user | 0
+(3 rows)
+
+db> 
+db> 
+db> error 412: duplicate value in a unique column
+
+db> 
+db> error 411: NULL in a NOT NULL column
+
+db> 
+db> error 412: duplicate value in a unique column
+
+db> 
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> count(*)
+3
+(1 row)
+
+db> 
+db> 
+db> error 411: NULL in a NOT NULL column
+
+db> 
+db> error 414: text is longer than the column allows
+
+db> 
+db> error 413: row fails the table's CHECK
+
+db> error 413: row fails the table's CHECK
+
+db> 1 row inserted into users
+
+db> 
+db> 
+db> error 316: a column with no value and no default
+
+db> 
+db> error 305: duplicate column name
+
+db> 
+db> error 302: no such column
+
+db> 
+db> error 304: wrong number of values
+
+db> 
+db> 
+db> error 413: row fails the table's CHECK
+
+db> error 411: NULL in a NOT NULL column
+
+db> error 412: duplicate value in a unique column
+
+db> 1 row(s) updated in users
+
+db> id | name | role | age
+1 | ada | staff | 36
+(1 row)
+
+db> 
+db> 
+db> error 412: duplicate value in a unique column
+
+db> 
+db> count(*)
+0
+(1 row)
+
+db> 
+db> 
+db> 1 row(s) deleted from users
+
+db> 1 row inserted into users
+
+db> id | email | role
+1 | a@x | user
+2 | b@x | user
+3 | NULL | user
+5 | NULL | user
+6 | NULL | user
+7 | NULL | user
+(6 rows)
+
+db> 
+db> 
+db> users: 8 slot(s) compacted to 6 row(s), 2 reclaimed
+
+db> --- indexes (main) ---
+users_email_key on users(email): 2 key(s), depth 1
+users_id_key on users(id): 6 key(s), depth 1
+
+db> error 412: duplicate value in a unique column
+
+db> count(*)
+6
+(1 row)
+
+db> 

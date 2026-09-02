@@ -1,0 +1,29 @@
+# Build output
+x64/
+Debug/
+Release/
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.o
+*.a
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.vcxproj.bak
+
+# Databases the engine writes
+*.db
+*.db.tmp
+*.wal
+
+# Test scratch
+tests/fuzz_tmp/
+tests/__pycache__/
+__pycache__/
+
+# Editors
+*.bak
+*.swp

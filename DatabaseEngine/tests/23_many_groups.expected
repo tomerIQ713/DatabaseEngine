@@ -1,0 +1,6542 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> count(*)
+2002
+(1 row)
+
+db> count(*)
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+2
+(501 rows)
+
+db> k | count(*) | sum(n)
+NULL | 2 | 3
+key0 | 4 | 3000
+key1 | 4 | 3004
+(3 rows)
+
+db> k | count(*)
+key0 | 4
+key1 | 4
+(2 rows)
+
+db> k | min(n) | max(n)
+key99 | 99 | 1599
+key98 | 98 | 1598
+(2 rows)
+
+db> count(*)
+1
+2
+2
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+(2000 rows)
+
+db> k
+NULL
+key0
+key1
+(3 rows)
+
+db> 

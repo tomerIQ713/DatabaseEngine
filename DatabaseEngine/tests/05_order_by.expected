@@ -1,0 +1,67 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> id | name
+1 | apple
+2 | avocado
+3 | banana
+4 | cherry
+5 | NULL
+(5 rows)
+
+db> id | name
+5 | NULL
+4 | cherry
+3 | banana
+2 | avocado
+1 | apple
+(5 rows)
+
+db> id | name
+5 | NULL
+1 | apple
+2 | avocado
+3 | banana
+4 | cherry
+(5 rows)
+
+db> id | name
+4 | cherry
+3 | banana
+2 | avocado
+1 | apple
+5 | NULL
+(5 rows)
+
+db> id | name
+5 | NULL
+1 | apple
+2 | avocado
+3 | banana
+4 | cherry
+(5 rows)
+
+db> id | name
+5 | NULL
+1 | apple
+2 | avocado
+3 | banana
+4 | cherry
+(5 rows)
+
+db> error 302: no such column
+
+db> error 211: expected BY after GROUP or ORDER
+
+db> 

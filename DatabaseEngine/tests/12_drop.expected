@@ -1,0 +1,68 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> index idx created on t(id), 2 row(s) indexed
+
+db> index idx2 created on t(name), 2 row(s) indexed
+
+db> --- catalog (main) ---
+t(id int, name text)
+
+db> --- indexes (main) ---
+idx2 on t(name): 2 key(s), depth 1
+idx on t(id): 2 key(s), depth 1
+
+db> index idx dropped
+
+db> --- indexes (main) ---
+idx2 on t(name): 2 key(s), depth 1
+
+db> id | name
+1 | a
+(1 row)
+
+db> error 308: no such index
+
+db> error 308: no such index
+
+db> count(*)
+2
+(1 row)
+
+db> table t dropped
+
+db> --- catalog (main) ---
+
+db> --- no indexes ---
+
+db> error 300: no such table
+
+db> error 300: no such table
+
+db> table t created with 1 column(s)
+
+db> --- catalog (main) ---
+t(id int)
+
+db> count(*)
+0
+(1 row)
+
+db> 1 row inserted into t
+
+db> id
+7
+(1 row)
+
+db> error 202: expected a table name
+
+db> error 200: not a valid statement
+
+db> error 202: expected a table name
+
+db> 

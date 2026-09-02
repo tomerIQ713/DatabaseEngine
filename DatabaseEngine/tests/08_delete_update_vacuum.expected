@@ -1,0 +1,83 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> index idx created on t(id), 4 row(s) indexed
+
+db> 1 row(s) deleted from t
+
+db> id | name
+10 | a
+30 | c
+40 | d
+(3 rows)
+
+db> id | name
+(0 rows)
+
+db> 1 row(s) updated in t
+
+db> id | name
+10 | a
+40 | d
+99 | c
+(3 rows)
+
+db> id | name
+(0 rows)
+
+db> id | name
+99 | c
+(1 row)
+
+db> 1 row(s) updated in t
+
+db> id | name
+1 | Z
+40 | d
+99 | c
+(3 rows)
+
+db> error 305: duplicate column name
+
+db> error 302: no such column
+
+db> error 300: no such table
+
+db> --- indexes (main) ---
+idx on t(id): 6 key(s), depth 1
+
+db> count(*)
+3
+(1 row)
+
+db> t: 6 slot(s) compacted to 3 row(s), 3 reclaimed
+
+db> --- indexes (main) ---
+idx on t(id): 3 key(s), depth 1
+
+db> count(*)
+3
+(1 row)
+
+db> id | name
+1 | Z
+40 | d
+99 | c
+(3 rows)
+
+db> id | name
+99 | c
+(1 row)
+
+db> error 300: no such table
+
+db> 

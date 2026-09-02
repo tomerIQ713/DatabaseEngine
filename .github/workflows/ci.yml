@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux (gcc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        working-directory: DatabaseEngine
+        run: cc -std=c17 -O2 -Wall -Wextra -Wpedantic -o db *.c
+
+      - name: Golden files
+        working-directory: DatabaseEngine
+        run: ./tests/run.sh ./db
+
+      - name: Crash recovery
+        working-directory: DatabaseEngine
+        run: ./tests/recovery.sh ./db
+
+      - name: Wire protocol
+        working-directory: DatabaseEngine
+        run: ./tests/wire.sh ./db
+
+  sanitizers:
+    name: Linux (ASan + UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Windows toolchain this was written on has no working
+      # -fsanitize=address, so this job is the only place the engine runs
+      # under one. Every suite runs again, and the fuzzer with it.
+      - name: Build instrumented
+        working-directory: DatabaseEngine
+        run: cc -std=c17 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -o db-asan *.c
+
+      - name: Golden files
+        working-directory: DatabaseEngine
+        run: ./tests/run.sh ./db-asan
+
+      - name: Crash recovery
+        working-directory: DatabaseEngine
+        run: ./tests/recovery.sh ./db-asan
+
+      - name: Wire protocol
+        working-directory: DatabaseEngine
+        run: ./tests/wire.sh ./db-asan
+
+      - name: Fuzz SQL
+        working-directory: DatabaseEngine
+        run: python3 tests/fuzz.py sql --exe ./db-asan --runs 200 --seed 1
+
+      - name: Fuzz wire
+        working-directory: DatabaseEngine
+        run: python3 tests/fuzz.py wire --exe ./db-asan --runs 100 --seed 1
+
+  macos:
+    name: macOS (clang)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        working-directory: DatabaseEngine
+        run: cc -std=c17 -O2 -Wall -Wextra -o db *.c
+
+      - name: Golden files
+        working-directory: DatabaseEngine
+        run: ./tests/run.sh ./db
+
+  windows:
+    name: Windows (MSVC)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Build
+        run: msbuild DatabaseEngine/DatabaseEngine.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+      - name: Golden files
+        working-directory: DatabaseEngine
+        shell: bash
+        run: ./tests/run.sh ../x64/Debug/DatabaseEngine.exe

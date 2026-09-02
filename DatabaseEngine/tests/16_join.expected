@@ -1,0 +1,98 @@
+in-memory only, nothing will be saved
+
+db> table users created with 3 column(s)
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> table orders created with 3 column(s)
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> users.id | users.name | users.city | orders.oid | orders.uid | orders.total
+1 | tomer | haifa | 10 | 1 | 250
+1 | tomer | haifa | 11 | 1 | 90
+2 | dana | tel aviv | 12 | 2 | 400
+(3 rows)
+
+db> users.name | orders.total
+tomer | 250
+tomer | 90
+dana | 400
+(3 rows)
+
+db> users.name | orders.total
+dana | 400
+tomer | 250
+(2 rows)
+
+db> users.name | sum(total)
+tomer | 340
+dana | 400
+(2 rows)
+
+db> users.name | count(*)
+tomer | 2
+(1 row)
+
+db> users.city
+haifa
+tel aviv
+(2 rows)
+
+db> count(*)
+12
+(1 row)
+
+db> table items created with 2 column(s)
+
+db> 1 row inserted into items
+
+db> 1 row inserted into items
+
+db> table lines created with 2 column(s)
+
+db> 1 row inserted into lines
+
+db> 1 row inserted into lines
+
+db> users.name | lines.item | items.price
+tomer | book | 30
+dana | pen | 5
+(2 rows)
+
+db> name
+dana
+(1 row)
+
+db> users.name | orders.total
+tomer | 250
+tomer | 90
+dana | 400
+(3 rows)
+
+db> users.name | orders.total
+tomer | 250
+dana | 400
+(2 rows)
+
+db> users.name | orders.total
+tomer | 250
+dana | 400
+(2 rows)
+
+db> users.name | lines.item | items.price
+tomer | book | 30
+dana | pen | 5
+(2 rows)
+
+db> 

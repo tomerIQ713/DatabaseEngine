@@ -1,0 +1,99 @@
+in-memory only, nothing will be saved
+
+db> table users created with 3 column(s)
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> table empty created with 1 column(s)
+
+db> index idx created on users(id), 4 row(s) indexed
+
+db> index idx_name created on users(name), 4 row(s) indexed
+
+db> 1 row(s) deleted from users
+
+db> 1 row(s) updated in users
+
+db> --- catalog (main) ---
+empty(k int)
+users(id int, name text, note text)
+
+db> --- indexes (main) ---
+idx_name on users(name): 4 key(s), depth 1
+idx on users(id): 5 key(s), depth 1
+
+db> id | name | note
+-42 | NULL | it's quoted
+1 | Tomer | updated
+2 | Dana | NULL
+(3 rows)
+
+db> saved to tmp_test.db
+
+db> table users dropped
+
+db> table empty dropped
+
+db> --- catalog (main) ---
+
+db> --- no indexes ---
+
+db> loaded tmp_test.db
+
+db> --- catalog (main) ---
+empty(k int)
+users(id int, name text, note text)
+
+db> --- indexes (main) ---
+idx on users(id): 5 key(s), depth 1
+idx_name on users(name): 4 key(s), depth 1
+
+db> id | name | note
+-42 | NULL | it's quoted
+1 | Tomer | updated
+2 | Dana | NULL
+(3 rows)
+
+db> count(*)
+0
+(1 row)
+
+db> id | name | note
+-42 | NULL | it's quoted
+(1 row)
+
+db> id | name | note
+2 | Dana | NULL
+(1 row)
+
+db> id | name | note
+-42 | NULL | it's quoted
+(1 row)
+
+db> id | name | note
+-42 | NULL | it's quoted
+(1 row)
+
+db> 1 row inserted into users
+
+db> count(*)
+4
+(1 row)
+
+db> error 600: cannot open the database file
+
+db> --- catalog (main) ---
+empty(k int)
+users(id int, name text, note text)
+
+db> count(*)
+4
+(1 row)
+
+db> 

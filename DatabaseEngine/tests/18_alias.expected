@@ -1,0 +1,78 @@
+in-memory only, nothing will be saved
+
+db> table emp created with 4 column(s)
+
+db> 1 row inserted into emp
+
+db> 1 row inserted into emp
+
+db> 1 row inserted into emp
+
+db> 1 row inserted into emp
+
+db> e.name | b.name
+dana | yossi
+maya | yossi
+tomer | yossi
+(3 rows)
+
+db> worker | manager
+dana | yossi
+maya | yossi
+tomer | yossi
+(3 rows)
+
+db> a.name | b.name
+dana | yossi
+tomer | dana
+tomer | yossi
+(3 rows)
+
+db> e.name
+dana
+maya
+tomer
+yossi
+(4 rows)
+
+db> e.id | e.name | e.boss | e.dept
+1 | tomer | 3 | eng
+2 | dana | 3 | eng
+(2 rows)
+
+db> e.dept | count(*)
+eng | 3
+sales | 1
+(2 rows)
+
+db> d | headcount
+eng | 3
+sales | 1
+(2 rows)
+
+db> n
+maya
+(1 row)
+
+db> dept | c
+eng | 3
+(1 row)
+
+db> name
+dana
+maya
+tomer
+yossi
+(4 rows)
+
+db> total
+4
+(1 row)
+
+db> error 314: the same table is listed twice in FROM
+
+db> error 302: no such column
+
+db> error 302: no such column
+
+db> 

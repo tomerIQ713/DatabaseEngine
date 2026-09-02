@@ -1,0 +1,25 @@
+-- keywords fold case; identifiers that merely start like one do not
+CREATE TABLE Users (Id INT, Name TEXT, City TEXT);
+InSeRt InTo users VaLuEs (1, 'tomer', 'haifa');
+insert into USERS values (2, 'dana', 'tel aviv');
+INSERT INTO users VALUES (3, 'yossi', 'haifa');
+SELECT Name FROM Users WHERE City = 'haifa' ORDER BY Name;
+select name from users where city is not null and id > 1 order by name desc;
+Select City, Count(*) From Users Group By City Having Count(*) > 1;
+select distinct city from users order by city;
+select name from users where name like 'd%' or name not like '%a%';
+CREATE INDEX users_id ON users (id);
+select name from users where id = 2;
+create table selection (selects int, ints text, ons int, ass int);
+insert into selection values (1, 'x', 2, 3);
+select selects, ints, ons, ass from selection;
+select s.selects from selection s;
+create table intz (asc1 int, desc1 int, byte text);
+insert into intz values (1, 2, 'k');
+select asc1, desc1, byte from intz order by asc1;
+UPDATE users SET city = 'eilat' WHERE id = 3;
+DELETE FROM users WHERE id = 3;
+VACUUM users;
+select count(*) from users;
+DROP TABLE intz;
+select * from intz;

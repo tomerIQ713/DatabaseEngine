@@ -1,0 +1,59 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> index idx created on t(id), 4 row(s) indexed
+
+db> error 307: index already exists
+
+db> error 302: no such column
+
+db> error 300: no such table
+
+db> --- indexes (main) ---
+idx on t(id): 4 key(s), depth 1
+
+db> 
+db> [index scan: idx on t(id)]
+id | name
+20 | d
+20 | b
+(2 rows)
+
+db> [index scan: idx on t(id)]
+id | name
+20 | d
+20 | b
+30 | c
+(3 rows)
+
+db> [index scan: idx on t(id)]
+id | name
+10 | a
+(1 row)
+
+db> [table scan: t, 4 slot(s)]
+id | name
+10 | a
+(1 row)
+
+db> 
+db> index idx_name created on t(name), 4 row(s) indexed
+
+db> name
+a
+(1 row)
+
+db> --- indexes (main) ---
+idx_name on t(name): 4 key(s), depth 1
+idx on t(id): 4 key(s), depth 1
+
+db> 

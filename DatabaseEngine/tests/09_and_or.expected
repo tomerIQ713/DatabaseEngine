@@ -1,0 +1,113 @@
+in-memory only, nothing will be saved
+
+db> table t created with 3 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> id | name | tag
+3 | cherry | red
+5 | NULL | red
+(2 rows)
+
+db> id | name | tag
+1 | apple | red
+4 | avocado | green
+(2 rows)
+
+db> id | name | tag
+1 | apple | red
+2 | banana | yellow
+4 | avocado | green
+(3 rows)
+
+db> id | name | tag
+1 | apple | red
+4 | avocado | green
+(2 rows)
+
+db> id | name | tag
+1 | apple | red
+(1 row)
+
+db> id | name | tag
+3 | cherry | red
+4 | avocado | green
+5 | NULL | red
+(3 rows)
+
+db> id | name | tag
+2 | banana | yellow
+4 | avocado | green
+(2 rows)
+
+db> id | name | tag
+3 | cherry | red
+4 | avocado | green
+5 | NULL | red
+(3 rows)
+
+db> id | name | tag
+1 | apple | red
+(1 row)
+
+db> id | name | tag
+3 | cherry | red
+(1 row)
+
+db> id | name | tag
+1 | apple | red
+5 | NULL | red
+(2 rows)
+
+db> id | name | tag
+1 | apple | red
+4 | avocado | green
+(2 rows)
+
+db> id | name | tag
+2 | banana | yellow
+3 | cherry | red
+(2 rows)
+
+db> id | name | tag
+(0 rows)
+
+db> id
+1
+(1 row)
+
+db> 2 row(s) deleted from t
+
+db> id | name | tag
+1 | apple | red
+3 | cherry | red
+5 | NULL | red
+(3 rows)
+
+db> 1 row(s) updated in t
+
+db> id | name | tag
+1 | apple | x
+3 | cherry | red
+5 | NULL | red
+(3 rows)
+
+db> error 203: expected a column name
+
+db> error 203: expected a column name
+
+db> error 205: unbalanced parentheses
+
+db> error 302: no such column
+
+db> error 203: expected a column name
+
+db> 

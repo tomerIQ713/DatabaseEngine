@@ -1,0 +1,77 @@
+in-memory only, nothing will be saved
+
+db> 
+db> table Users created with 3 column(s)
+
+db> 1 row inserted into users
+
+db> 1 row inserted into USERS
+
+db> 1 row inserted into users
+
+db> Name
+tomer
+yossi
+(2 rows)
+
+db> Name
+yossi
+dana
+(2 rows)
+
+db> City | Count(*)
+haifa | 2
+(1 row)
+
+db> City
+haifa
+tel aviv
+(2 rows)
+
+db> Name
+tomer
+dana
+yossi
+(3 rows)
+
+db> index users_id created on Users(Id), 3 row(s) indexed
+
+db> Name
+dana
+(1 row)
+
+db> table selection created with 4 column(s)
+
+db> 1 row inserted into selection
+
+db> selects | ints | ons | ass
+1 | x | 2 | 3
+(1 row)
+
+db> s.selects
+1
+(1 row)
+
+db> table intz created with 3 column(s)
+
+db> 1 row inserted into intz
+
+db> asc1 | desc1 | byte
+1 | 2 | k
+(1 row)
+
+db> 1 row(s) updated in Users
+
+db> 1 row(s) deleted from Users
+
+db> Users: 4 slot(s) compacted to 2 row(s), 2 reclaimed
+
+db> count(*)
+2
+(1 row)
+
+db> table intz dropped
+
+db> error 300: no such table
+
+db> 

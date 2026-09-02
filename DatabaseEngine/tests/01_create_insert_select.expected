@@ -1,0 +1,49 @@
+in-memory only, nothing will be saved
+
+db> table users created with 2 column(s)
+
+db> error 301: table already exists
+
+db> error 203: expected a column name
+
+db> error 204: expected a column type
+
+db> error 204: expected a column type
+
+db> --- catalog (main) ---
+users(id int, name text)
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> error 304: wrong number of values
+
+db> error 303: type mismatch
+
+db> error 304: wrong number of values
+
+db> error 300: no such table
+
+db> id | name
+1 | Tomer
+2 | Dana
+(2 rows)
+
+db> name
+Tomer
+Dana
+(2 rows)
+
+db> name | id
+Tomer | 1
+Dana | 2
+(2 rows)
+
+db> error 302: no such column
+
+db> error 300: no such table
+
+db> error 206: unexpected tokens after statement
+
+db> 

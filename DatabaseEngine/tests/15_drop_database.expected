@@ -1,0 +1,110 @@
+in-memory only, nothing will be saved
+
+db> database shop created
+
+db> database blog created
+
+db> using database shop
+
+db> table products created with 2 column(s)
+
+db> 1 row inserted into products
+
+db> index pidx created on products(id), 1 row(s) indexed
+
+db> using database blog
+
+db> table posts created with 2 column(s)
+
+db> 1 row inserted into posts
+
+db> using database main
+
+db> table t created with 1 column(s)
+
+db> 1 row inserted into t
+
+db> --- databases ---
+main  (current)
+shop
+blog
+
+db> database blog dropped
+
+db> --- databases ---
+main  (current)
+shop
+
+db> error 311: no such database
+
+db> error 311: no such database
+
+db> error 312: the default database cannot be dropped
+
+db> error 202: expected a table name
+
+db> using database shop
+
+db> --- databases ---
+main
+shop  (current)
+
+db> database shop dropped
+
+db> --- databases ---
+main  (current)
+
+db> --- catalog (main) ---
+t(id int)
+
+db> id
+1
+(1 row)
+
+db> database reused created
+
+db> using database reused
+
+db> --- catalog (reused) ---
+
+db> --- no indexes ---
+
+db> error 300: no such table
+
+db> table products created with 1 column(s)
+
+db> 1 row inserted into products
+
+db> other
+clean slot
+(1 row)
+
+db> saved to tmp_test.db
+
+db> database temporary created
+
+db> --- databases ---
+main
+reused  (current)
+temporary
+
+db> loaded tmp_test.db
+
+db> --- databases ---
+main
+reused  (current)
+
+db> --- catalog (reused) ---
+products(other text)
+
+db> other
+clean slot
+(1 row)
+
+db> using database main
+
+db> id
+1
+(1 row)
+
+db> 

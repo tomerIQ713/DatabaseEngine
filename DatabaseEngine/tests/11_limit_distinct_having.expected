@@ -1,0 +1,127 @@
+in-memory only, nothing will be saved
+
+db> table sales created with 3 column(s)
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> dept | rep | amount
+hr | Maya | 400
+ops | Noa | 300
+eng | Dana | 200
+(3 rows)
+
+db> dept | rep | amount
+hr | Ron | NULL
+hr | Ann | NULL
+(2 rows)
+
+db> dept | rep | amount
+(0 rows)
+
+db> dept | rep | amount
+hr | Ron | NULL
+hr | Ann | NULL
+ops | Gil | 50
+eng | Tomer | 100
+eng | Dana | 200
+ops | Noa | 300
+hr | Maya | 400
+(7 rows)
+
+db> error 209: expected a number or a quoted string
+
+db> error 209: expected a number or a quoted string
+
+db> dept
+eng
+hr
+ops
+(3 rows)
+
+db> amount
+NULL
+50
+100
+200
+300
+400
+(6 rows)
+
+db> dept | amount
+eng | 100
+eng | 200
+hr | NULL
+hr | 400
+ops | 50
+ops | 300
+(6 rows)
+
+db> dept | rep | amount
+hr | Ann | NULL
+eng | Dana | 200
+ops | Gil | 50
+(3 rows)
+
+db> error 302: no such column
+
+db> dept | count(*)
+hr | 3
+(1 row)
+
+db> dept | sum(amount)
+eng | 300
+ops | 350
+hr | 400
+(3 rows)
+
+db> dept | count(*)
+eng | 2
+(1 row)
+
+db> dept | count(*)
+eng | 2
+hr | 3
+ops | 2
+(3 rows)
+
+db> dept | count(*)
+eng | 2
+(1 row)
+
+db> dept | count(*) | sum(amount)
+ops | 2 | 350
+hr | 3 | 400
+(2 rows)
+
+db> dept | count(*)
+eng | 2
+ops | 2
+hr | 3
+(3 rows)
+
+db> count(*)
+7
+(1 row)
+
+db> error 309: HAVING requires GROUP BY or an aggregate
+
+db> error 309: HAVING requires GROUP BY or an aggregate
+
+db> error 302: no such column
+
+db> dept | count(*)
+(0 rows)
+
+db> 

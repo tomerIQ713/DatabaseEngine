@@ -1,0 +1,86 @@
+in-memory only, nothing will be saved
+
+db> table docs created with 2 column(s)
+
+db> 1 row inserted into docs
+
+db> 1 row inserted into docs
+
+db> 1 row inserted into docs
+
+db> 1 row inserted into docs
+
+db> 1 row inserted into docs
+
+db> 1 row inserted into docs
+
+db> id
+-1
+0
+10
+200
+1000
+3000
+(6 rows)
+
+db> id
+10
+200
+1000
+3000
+(4 rows)
+
+db> id
+1000
+(1 row)
+
+db> id
+-1
+(1 row)
+
+db> id
+0
+(1 row)
+
+db> index docs_body created on docs(body), 6 row(s) indexed
+
+db> id
+3000
+(1 row)
+
+db> id
+10
+200
+1000
+3000
+(4 rows)
+
+db> min(id) | max(id) | count(*)
+-1 | 3000 | 6
+(1 row)
+
+db> saved to tmp_test.db
+
+db> loaded tmp_test.db
+
+db> id
+3000
+(1 row)
+
+db> count(*)
+6
+(1 row)
+
+db> 1 row(s) updated in docs
+
+db> id
+10
+(1 row)
+
+db> docs: 7 slot(s) compacted to 6 row(s), 1 reclaimed
+
+db> id
+10
+(1 row)
+
+db> 

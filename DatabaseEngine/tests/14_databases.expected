@@ -1,0 +1,132 @@
+in-memory only, nothing will be saved
+
+db> --- databases ---
+main  (current)
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> database shop created
+
+db> error 310: database already exists
+
+db> database blog created
+
+db> --- databases ---
+main  (current)
+shop
+blog
+
+db> using database shop
+
+db> --- databases ---
+main
+shop  (current)
+blog
+
+db> --- catalog (shop) ---
+
+db> table products created with 2 column(s)
+
+db> 1 row inserted into products
+
+db> 1 row inserted into products
+
+db> index pidx created on products(id), 2 row(s) indexed
+
+db> id | name
+1 | widget
+2 | gadget
+(2 rows)
+
+db> error 300: no such table
+
+db> error 300: no such table
+
+db> using database blog
+
+db> --- catalog (blog) ---
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> id | tag
+99 | in blog
+(1 row)
+
+db> using database main
+
+db> --- catalog (main) ---
+t(id int, tag text)
+
+db> id | tag
+1 | in main
+(1 row)
+
+db> error 311: no such database
+
+db> error 202: expected a table name
+
+db> error 202: expected a table name
+
+db> error 310: database already exists
+
+db> --- databases ---
+main  (current)
+shop
+blog
+
+db> saved to tmp_test.db
+
+db> database temp1 created
+
+db> using database temp1
+
+db> table gone created with 1 column(s)
+
+db> --- databases ---
+main
+shop
+blog
+temp1  (current)
+
+db> loaded tmp_test.db
+
+db> --- databases ---
+main  (current)
+shop
+blog
+
+db> --- catalog (main) ---
+t(id int, tag text)
+
+db> id | tag
+1 | in main
+(1 row)
+
+db> using database shop
+
+db> --- catalog (shop) ---
+products(id int, name text)
+
+db> --- indexes (shop) ---
+pidx on products(id): 2 key(s), depth 1
+
+db> id | name
+1 | widget
+2 | gadget
+(2 rows)
+
+db> id | name
+2 | gadget
+(1 row)
+
+db> using database blog
+
+db> id | tag
+99 | in blog
+(1 row)
+
+db> 

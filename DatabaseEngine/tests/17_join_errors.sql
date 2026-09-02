@@ -1,0 +1,17 @@
+create table a (id int, tag text);
+create table b (id int, tag text);
+insert into a values (1, 'x');
+insert into a values (2, null);
+insert into b values (1, 'x');
+insert into b values (null, 'z');
+select id from a, b;
+select a.id, b.id from a, b where a.id = b.id;
+select a.tag, b.tag from a, b where a.tag = b.tag;
+select * from a, a;
+select tag from a where tag = id;
+select id from a, b where a.id = c.id;
+select id from missing, a;
+delete from a, b;
+update a, b set id = 1;
+select id from a join b;
+select id from a join b on a.id = b.zz;

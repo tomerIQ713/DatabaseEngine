@@ -1,0 +1,129 @@
+in-memory only, nothing will be saved
+
+db> 
+db> table t created with 3 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> index t_id created on t(id), 5 row(s) indexed
+
+db> index t_name created on t(name), 5 row(s) indexed
+
+db> --- indexes (main) ---
+t_name on t(name): 5 key(s), depth 1
+t_id on t(id): 5 key(s), depth 1
+
+db> id
+9
+(1 row)
+
+db> id
+-3
+(1 row)
+
+db> id
+5
+7
+9
+(3 rows)
+
+db> name
+ccc
+(1 row)
+
+db> name
+ggg
+(1 row)
+
+db> saved to tmp_test.db
+
+db> loaded tmp_test.db
+
+db> --- indexes (main) ---
+t_id on t(id): 5 key(s), depth 1
+t_name on t(name): 5 key(s), depth 1
+
+db> id
+9
+(1 row)
+
+db> id
+-3
+(1 row)
+
+db> id
+5
+7
+9
+(3 rows)
+
+db> name
+ccc
+(1 row)
+
+db> name
+ggg
+(1 row)
+
+db> 1 row inserted into t
+
+db> id
+2
+(1 row)
+
+db> 1 row(s) deleted from t
+
+db> id
+7
+9
+(2 rows)
+
+db> --- indexes (main) ---
+t_id on t(id): 6 key(s), depth 1
+t_name on t(name): 6 key(s), depth 1
+
+db> t: 6 slot(s) compacted to 5 row(s), 1 reclaimed
+
+db> --- indexes (main) ---
+t_id on t(id): 5 key(s), depth 1
+t_name on t(name): 5 key(s), depth 1
+
+db> id
+7
+9
+(2 rows)
+
+db> id
+2
+(1 row)
+
+db> saved to tmp_test.db
+
+db> loaded tmp_test.db
+
+db> id
+2
+(1 row)
+
+db> count(*)
+5
+(1 row)
+
+db> index t_name dropped
+
+db> --- indexes (main) ---
+t_id on t(id): 5 key(s), depth 1
+
+db> table t dropped
+
+db> --- no indexes ---
+
+db> 

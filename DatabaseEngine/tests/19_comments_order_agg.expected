@@ -1,0 +1,53 @@
+in-memory only, nothing will be saved
+
+db> 
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 
+db> city | count(*)
+haifa | 2
+eilat | 1
+NULL | 1
+(3 rows)
+
+db> city | count(*)
+NULL | 1
+eilat | 1
+haifa | 2
+(3 rows)
+
+db> city | sum(id)
+NULL | 4
+eilat | 3
+haifa | 3
+(3 rows)
+
+db> city | n
+haifa | 2
+NULL | 1
+eilat | 1
+(3 rows)
+
+db> city | min(id) | max(id)
+haifa | 1 | 2
+eilat | 3 | 3
+NULL | 4 | 4
+(3 rows)
+
+db> id
+(0 rows)
+
+db> id
+4
+3
+(2 rows)
+
+db> 

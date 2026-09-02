@@ -1,0 +1,41 @@
+in-memory only, nothing will be saved
+
+db> table a created with 2 column(s)
+
+db> table b created with 2 column(s)
+
+db> 1 row inserted into a
+
+db> 1 row inserted into a
+
+db> 1 row inserted into b
+
+db> 1 row inserted into b
+
+db> error 313: column name matches more than one table
+
+db> a.id | b.id
+1 | 1
+(1 row)
+
+db> a.tag | b.tag
+x | x
+(1 row)
+
+db> error 314: the same table is listed twice in FROM
+
+db> error 303: type mismatch
+
+db> error 302: no such column
+
+db> error 300: no such table
+
+db> error 206: unexpected tokens after statement
+
+db> error 215: expected SET
+
+db> error 214: expected ON
+
+db> error 302: no such column
+
+db> 

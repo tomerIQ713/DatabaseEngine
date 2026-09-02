@@ -1,0 +1,70 @@
+in-memory only, nothing will be saved
+
+db> 
+db> 
+db> 
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 
+db> transaction started
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> count(*)
+3
+(1 row)
+
+db> transaction committed
+
+db> count(*)
+3
+(1 row)
+
+db> 
+db> 
+db> transaction started
+
+db> error 408: a transaction is already open
+
+db> transaction committed
+
+db> 
+db> 
+db> error 409: no transaction is open
+
+db> error 409: no transaction is open
+
+db> 
+db> 
+db> transaction started
+
+db> 1 row inserted into t
+
+db> error 410: nothing to roll back to: this session has no database file
+
+db> 
+db> count(*)
+4
+(1 row)
+
+db> transaction committed
+
+db> 
+db> 
+db> transaction started
+
+db> error 304: wrong number of values
+
+db> 1 row inserted into t
+
+db> transaction committed
+
+db> count(*)
+5
+(1 row)
+
+db> 

@@ -1,0 +1,54 @@
+in-memory only, nothing will be saved
+
+db> table sales created with 3 column(s)
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> 1 row inserted into sales
+
+db> dept | count(*)
+eng | 2
+ops | 2
+hr | 1
+(3 rows)
+
+db> dept | count(*) | sum(amount) | min(amount) | max(amount)
+eng | 2 | 350 | 100 | 250
+ops | 2 | 100 | 25 | 75
+hr | 1 | 400 | 400 | 400
+(3 rows)
+
+db> dept | region | count(*)
+eng | north | 1
+eng | south | 1
+ops | north | 2
+hr | south | 1
+(4 rows)
+
+db> count(*)
+5
+(1 row)
+
+db> error 306: column must appear in GROUP BY or an aggregate
+
+db> error 306: column must appear in GROUP BY or an aggregate
+
+db> error 306: column must appear in GROUP BY or an aggregate
+
+db> error 303: type mismatch
+
+db> avg(amount)
+170
+(1 row)
+
+db> error 203: expected a column name
+
+db> error 211: expected BY after GROUP or ORDER
+
+db> 

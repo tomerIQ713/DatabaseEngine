@@ -1,0 +1,75 @@
+in-memory only, nothing will be saved
+
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> name
+apple
+application
+apricot
+avocado
+banana
+(5 rows)
+
+db> name
+apple
+application
+apricot
+(3 rows)
+
+db> name
+banana
+(1 row)
+
+db> name
+apple
+application
+apricot
+(3 rows)
+
+db> name
+apple
+(1 row)
+
+db> name
+apple
+application
+apricot
+avocado
+banana
+(5 rows)
+
+db> name
+(0 rows)
+
+db> name
+banana
+(1 row)
+
+db> name
+(0 rows)
+
+db> name
+avocado
+banana
+(2 rows)
+
+db> name
+(0 rows)
+
+db> error 303: type mismatch
+
+db> error 209: expected a number or a quoted string
+
+db> 
