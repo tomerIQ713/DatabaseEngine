@@ -1,0 +1,110 @@
+in-memory only, nothing will be saved
+
+db> 
+db> 
+db> table users created with 2 column(s)
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 
+db> table orders created with 3 column(s)
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> 
+db> 
+db> users.name | orders.item
+ada | book
+ada | pen
+bo | NULL
+cy | lamp
+(4 rows)
+
+db> users.name | orders.item
+ada | book
+ada | pen
+bo | NULL
+cy | lamp
+(4 rows)
+
+db> 
+db> 
+db> users.name | orders.item
+ada | book
+ada | pen
+cy | lamp
+(3 rows)
+
+db> 
+db> 
+db> users.name | count(orders.item)
+ada | 2
+bo | 0
+cy | 1
+(3 rows)
+
+db> 
+db> 
+db> 
+db> users.name | orders.item
+ada | book
+bo | NULL
+cy | lamp
+(3 rows)
+
+db> users.name | orders.item
+ada | book
+cy | lamp
+(2 rows)
+
+db> 
+db> 
+db> users.name
+bo
+(1 row)
+
+db> 
+db> 
+db> table a created with 2 column(s)
+
+db> 1 row inserted into a
+
+db> 1 row inserted into a
+
+db> table b created with 3 column(s)
+
+db> 1 row inserted into b
+
+db> table c created with 3 column(s)
+
+db> 1 row inserted into c
+
+db> a.x | b.y | c.z
+a1 | b1 | c1
+a2 | NULL | NULL
+(2 rows)
+
+db> 
+db> 
+db> a.x | b.y
+a2 | NULL
+a1 | b1
+(2 rows)
+
+db> count(*)
+2
+(1 row)
+
+db> 
+db> 
+db> error 214: expected ON
+
+db> 

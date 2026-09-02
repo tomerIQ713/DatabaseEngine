@@ -2249,6 +2249,16 @@ static int joinTables(const SelectStatement* select, const Condition* where,
     if (heap == NULL)
         return ERROR_SEMANTIC_TABLE_NOT_FOUND;
 
+    const CatalogNode* node = findTable(select->tables[t]);
+    if (node == NULL)
+        return ERROR_SEMANTIC_TABLE_NOT_FOUND;
+
+    /* For a LEFT JOIN this level decides which rows of its table may pair with
+       the prefix above it, and whether any did. An inner join has neither: its
+       ON was ANDed into the WHERE and is applied once, at the leaf. */
+    const int onRoot  = select->onRoot[t];
+    int       matched = ZERO;
+
     /*
      * Each level holds its page pinned while the levels under it run, so the
      * combined row can point straight at the source pages instead of copying
@@ -2269,6 +2279,17 @@ static int joinTables(const SelectStatement* select, const Condition* where,
         for (int c = ZERO; c < source.ncols; c++)
             work->values[base + c] = source.values[c];
 
+        if (onRoot >= ZERO) {
+            /* The ON sees the prefix and this row; the levels below are not
+               filled yet and it cannot refer to them. */
+            work->ncols = base + source.ncols;
+
+            if (evaluateCondition(&select->where, onRoot, work) != TRI_TRUE)
+                continue;
+
+            matched = ONE;
+        }
+
         int errorCode = joinTables(select, where, t + ONE,
                                    base + source.ncols, work);
         if (errorCode != SUCCESS_CODE) {
@@ -2278,6 +2299,23 @@ static int joinTables(const SelectStatement* select, const Condition* where,
     }
 
     heapScanEnd(&scan);
+
+    /* Nothing on the right matched, and the join says the left row survives
+       anyway - so it is completed with NULLs and passed down. `matched` is
+       local to this call, which is one call per prefix, so it is asking
+       exactly the right question. */
+    if (select->outer[t] && !matched) {
+        for (int c = ZERO; c < node->ncols; c++) {
+            Value* value = &work->values[base + c];
+
+            memset(value, ZERO, sizeof *value);
+            value->isNull = ONE;
+            value->type   = node->cols[c].type;
+        }
+
+        return joinTables(select, where, t + ONE, base + node->ncols, work);
+    }
+
     return SUCCESS_CODE;
 }
 
@@ -2530,7 +2568,13 @@ static int buildJoin(SelectStatement* select, const CatalogNode* schema)
     heapReset(&joinHeap);
     snprintf(joinHeap.table, NAME_LEN, "%s", schema->table);
 
-    if (select->ntables == TWO && select->where.present) {
+    /* The hash join drops left rows that find no partner, which is the whole
+       difference between an inner join and an outer one. */
+    int anyOuter = ZERO;
+    for (int t = ZERO; t < select->ntables; t++)
+        anyOuter |= select->outer[t];
+
+    if (select->ntables == TWO && select->where.present && !anyOuter) {
         const CatalogNode* first = findTable(select->tables[ZERO]);
         int                probeSlot;
         int                buildSlot;

@@ -948,6 +948,12 @@ static int parseSelect(const TokenList* tokens, SelectStatement* out)
 
     int whereRoot = -1;
     int expectOn  = ZERO;
+    int expectOuter = ZERO;             /* the join we are about to read is LEFT */
+
+    for (int t = ZERO; t < MAX_JOIN_TABLES; t++) {
+        out->outer[t]  = ZERO;
+        out->onRoot[t] = -ONE;
+    }
 
     for (;;) {
         if (typeAt(tokens, index) != TOKEN_IDENTIFIER)
@@ -973,11 +979,23 @@ static int parseSelect(const TokenList* tokens, SelectStatement* out)
             if (typeAt(tokens, index++) != TOKEN_KEYWORD_ON)
                 return ERROR_SYNTAX_EXPECTED_ON;
 
-            int errorCode = addCondition(tokens, &index, &out->where, &whereRoot);
+            /* An outer join's ON is built as its own tree in the same pool and
+               kept out of the WHERE. An inner join's is ANDed in, which is
+               what makes ON and WHERE interchangeable for one. */
+            int  standalone = -ONE;
+            int* root       = expectOuter ? &standalone : &whereRoot;
+
+            int errorCode = addCondition(tokens, &index, &out->where, root);
             if (errorCode != SUCCESS_CODE)
                 return errorCode;
 
-            expectOn = ZERO;
+            if (expectOuter) {
+                out->outer[slot]  = ONE;
+                out->onRoot[slot] = standalone;
+            }
+
+            expectOn    = ZERO;
+            expectOuter = ZERO;
         }
 
         if (typeAt(tokens, index) == TOKEN_COMMA) {
@@ -985,13 +1003,25 @@ static int parseSelect(const TokenList* tokens, SelectStatement* out)
             continue;
         }
 
-        int inner = typeAt(tokens, index) == TOKEN_KEYWORD_INNER ? ONE : ZERO;
+        /* [INNER] JOIN, or LEFT [OUTER] JOIN. The optional word in each is
+           noise; only LEFT changes what the join means. */
+        int skip = ZERO;
+        int left = ZERO;
 
-        if (typeAt(tokens, index + inner) != TOKEN_KEYWORD_JOIN)
+        if (typeAt(tokens, index) == TOKEN_KEYWORD_INNER) {
+            skip = ONE;
+        }
+        else if (typeAt(tokens, index) == TOKEN_KEYWORD_LEFT) {
+            left = ONE;
+            skip = typeAt(tokens, index + ONE) == TOKEN_KEYWORD_OUTER ? TWO : ONE;
+        }
+
+        if (typeAt(tokens, index + skip) != TOKEN_KEYWORD_JOIN)
             break;
 
-        index   += inner + ONE;
-        expectOn = ONE;
+        index      += skip + ONE;
+        expectOn    = ONE;
+        expectOuter = left;
     }
 
     snprintf(out->table, NAME_LEN, "%s", out->tables[ZERO]);

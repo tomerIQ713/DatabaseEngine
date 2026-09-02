@@ -174,6 +174,17 @@ static int checkSelect(SelectStatement* select)
     if (errorCode != SUCCESS_CODE)
         return errorCode;
 
+    /* An outer join's ON is a tree of its own inside the same pool, so it is
+       not reached by walking from the WHERE root and has to be checked here. */
+    for (int t = ZERO; t < select->ntables; t++) {
+        if (select->onRoot[t] < ZERO)
+            continue;
+
+        errorCode = checkCondition(table, &select->where, select->onRoot[t]);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+    }
+
     for (int i = ZERO; i < select->ngroup; i++) {
         int slot = findColumn(table, select->groupBy[i]);
         if (slot < ZERO)

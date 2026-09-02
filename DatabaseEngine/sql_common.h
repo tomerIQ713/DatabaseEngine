@@ -203,6 +203,8 @@ typedef enum {
     TOKEN_KEYWORD_COLUMN,
     TOKEN_KEYWORD_RENAME,
     TOKEN_KEYWORD_TO,
+    TOKEN_KEYWORD_LEFT,
+    TOKEN_KEYWORD_OUTER,
 
     TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
@@ -400,6 +402,13 @@ typedef struct {
        gave one, otherwise the table name itself. */
     char       aliases[MAX_JOIN_TABLES][NAME_LEN];
     int        ntables;             /* > 1 means the FROM list is a join */
+    /* LEFT JOIN. An inner join's ON is ANDed into the WHERE tree, because for
+       an inner join filtering and pairing are the same thing. An outer join's
+       is not: a row of the left table survives whether or not the ON matched,
+       so the two have to be asked separately. The subtree still lives in
+       where.nodes - only its root is held apart. */
+    int        outer[MAX_JOIN_TABLES];      /* 1 when table t was LEFT JOINed */
+    int        onRoot[MAX_JOIN_TABLES];     /* its ON tree, -1 when there is none */
     Condition  where;
     int        distinct;            /* SELECT DISTINCT */
     Condition  having;              /* names result columns, not table columns */
