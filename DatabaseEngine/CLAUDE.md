@@ -589,6 +589,9 @@ ordering is what makes the feature small and safe at once:
   `x = a OR x = b OR ...`, which is not a shortcut but the definition, NULL
   behaviour included: an OR of unknowns is unknown, exactly as `IN` against a
   set containing NULL is. Only the subquery form needs an operator of its own.
+  The cost is that each value spends two nodes of the condition pool, so a list
+  longer than about sixteen returns `ERROR_SYNTAX_CONDITION_TOO_COMPLEX` -
+  an error rather than a wrong answer, and the subquery form has no such limit.
 - **`parseSubquery`'s token list is a local, not a static.** It recurses for a
   nested subquery, and a shared buffer is overwritten by the inner call while
   the outer `parseSelect` is still reading it.

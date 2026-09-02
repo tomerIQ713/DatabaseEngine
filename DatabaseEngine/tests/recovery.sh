@@ -220,6 +220,25 @@ served=$(printf 'select * from t;\n.exit\n' | "$db" "$bad" 2>/dev/null \
          | tr -d '\r' | grep -c 'alpha')
 check "and its rows are not handed out" "0" "$served"
 
+# --- a schema change is transactional too ------------------------------------
+# ALTER changes the catalog in memory as well as on the page, and ROLLBACK puts
+# it back by re-reading the catalog - the same reload that restores the rows.
+schema="$work/s.db"
+printf "create table t (a int, b text);\ninsert into t values (1, \'x\');\n.exit\n" \
+    | "$db" "$schema" > /dev/null 2>&1
+
+# .tables prints one line per table, so the catalog is read straight off it
+rolled=$(printf 'begin;\nalter table t add column c int default 9;\nalter table t rename to renamed;\nrollback;\n.tables\n.exit\n' \
+         | "$db" "$schema" 2>&1 | tr -d '\r' | sed -n '/^t(/p')
+check "rollback undoes a schema change" "t(a int, b text)" "$rolled"
+
+printf 'begin;\nalter table t add column c int default 9;\ncommit;\n.exit\n' \
+    | "$db" "$schema" > /dev/null 2>&1
+
+kept=$(printf 'select * from t;\n.exit\n' | "$db" "$schema" 2>&1 \
+       | tr -d '\r' | sed -n '/^db> a | b | c$/{n;p;}')
+check "and a committed one survives" "1 | x | 9" "$kept"
+
 rm -rf "$work"
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

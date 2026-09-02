@@ -3,7 +3,7 @@
 [![CI](https://github.com/tomerIQ713/DatabaseEngine/actions/workflows/ci.yml/badge.svg)](https://github.com/tomerIQ713/DatabaseEngine/actions/workflows/ci.yml)
 
 A SQL database engine written from scratch in C99 — no dependencies, no
-libraries, about 13,000 lines. It has a buffer pool, write-ahead logging with
+libraries, about 14,000 lines. It has a buffer pool, write-ahead logging with
 crash recovery, persistent B+ tree indexes, checksummed pages, and it speaks
 the PostgreSQL wire protocol, so the official `psql` client connects to it and
 gets rows back.
@@ -176,6 +176,9 @@ Worth knowing before you reach for it:
   a scan already using the executor's shared state. It is refused with an
   error that says so, never answered wrongly.
 - **No `RIGHT`/`FULL JOIN`, no `UNION`, no subqueries in `FROM`.**
+- **`IN` with a literal list caps at about sixteen values**, because each one
+  spends two nodes of the fixed condition pool. Past that it is an error, not a
+  wrong answer; `IN (select ...)` has no such limit.
 - **No authentication.** Do not expose the port to a network you do not
   control.
 - **psql's backslash commands don't work** - `\d` and friends are SQL against
@@ -185,7 +188,7 @@ Worth knowing before you reach for it:
 
 ```bash
 ./tests/run.sh ./db          # 33 golden-file tests
-./tests/recovery.sh ./db     # 16 crash-recovery tests (kills the process mid-session)
+./tests/recovery.sh ./db     # 18 crash-recovery tests (kills the process mid-session)
 ./tests/wire.sh ./db         # 30 protocol tests (needs python3)
 ./tests/bench.sh ./db        # the table above
 ```
