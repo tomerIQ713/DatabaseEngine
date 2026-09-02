@@ -27,6 +27,10 @@
 #define MAX_INDEXES     64
 #define MAX_DATABASES   8
 #define MAX_JOIN_TABLES 4               /* tables allowed in one FROM list */
+/* A SelectStatement is ~18 KB, so these live in one static pool rather than
+   inside the statement that mentions them - which would make the type
+   recursive and the statement enormous. */
+#define MAX_SUBQUERIES  4
 /* the synthetic table a join is projected through. Angle brackets are not
    valid in an identifier, so no real table can collide with it - which also
    means findIndexOn never matches it and a join always scans. */
@@ -78,6 +82,7 @@
 #define ERROR_SYNTAX_EXPRESSION_TOO_COMPLEX 221
 #define ERROR_SYNTAX_EXPECTED_TABLE         222
 #define ERROR_SYNTAX_EXPECTED_TO            223
+#define ERROR_SYNTAX_TOO_MANY_SUBQUERIES    224
 
 #define ERROR_SEMANTIC_TABLE_NOT_FOUND      300
 #define ERROR_SEMANTIC_TABLE_EXISTS         301
@@ -100,6 +105,8 @@
 #define ERROR_SEMANTIC_LAST_COLUMN          318
 #define ERROR_SEMANTIC_ALTER_UNSUPPORTED    319
 #define ERROR_SEMANTIC_CHECK_BLOCKS_DROP    320
+#define ERROR_SEMANTIC_CORRELATED_SUBQUERY   321
+#define ERROR_SEMANTIC_SUBQUERY_COLUMNS      322
 #define ERROR_EXEC_TOO_MANY_DATABASES       404
 
 #define ERROR_EXEC_TABLE_FULL               400
@@ -118,6 +125,7 @@
 #define ERROR_EXEC_VALUE_TOO_LONG           414
 #define ERROR_EXEC_DIVIDE_BY_ZERO           415
 #define ERROR_EXEC_TABLE_TOO_WIDE           416
+#define ERROR_EXEC_SUBQUERY_NOT_SCALAR      417
 
 #define ERROR_IO_CANNOT_OPEN                600
 #define ERROR_IO_BAD_FORMAT                 601
@@ -205,6 +213,8 @@ typedef enum {
     TOKEN_KEYWORD_TO,
     TOKEN_KEYWORD_LEFT,
     TOKEN_KEYWORD_OUTER,
+    TOKEN_KEYWORD_IN,
+    TOKEN_KEYWORD_EXISTS,
 
     TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
@@ -337,7 +347,12 @@ typedef struct {
 typedef enum {
     OP_EQ, OP_NE, OP_LT, OP_LTE, OP_GT, OP_GTE,
     OP_IS_NULL, OP_IS_NOT_NULL,         /* these two ignore Predicate.value */
-    OP_LIKE, OP_NOT_LIKE                /* text only, % and _ wildcards */
+    OP_LIKE, OP_NOT_LIKE,               /* text only, % and _ wildcards */
+    /* Both read Predicate.subquery. Kept last so that the on-disk check in
+       12_persist.c - which refuses an operator above OP_NOT_LIKE - still
+       describes exactly the operators a stored CHECK may contain. */
+    OP_IN,                              /* left IN (select ...) */
+    OP_EXISTS                           /* EXISTS (select ...); no operands */
 } CompareOp;
 
 /*
@@ -352,6 +367,10 @@ typedef struct {
     int       left;
     CompareOp op;
     int       right;
+    /* -1, or an index into the subquery pool. A subquery is uncorrelated, so
+       it is run once before the outer scan starts and what it produced is what
+       every row is then tested against. */
+    int       subquery;
 } Predicate;
 
 typedef enum { COND_COMPARE, COND_AND, COND_OR, COND_NOT } ConditionKind;
@@ -613,7 +632,14 @@ CatalogNode* findTable(const char* name);
 int          addTable(const char* name, const Column cols[], int ncols,
                       const Condition* check);
 int          findColumn(const CatalogNode* table, const char* name);
+const char*  exprUnresolvedColumn(void);
 int          renameTableInCatalog(const char* from, const char* to);
+
+/* ---------- 04 parser: the subquery pool ---------- */
+void             resetSubqueries(void);
+int              subqueryTotal(void);
+int              subqueryIsScalar(int index);
+SelectStatement* subqueryAt(int index);
 int          buildJoinSchema(const char tables[][NAME_LEN],
                              const char aliases[][NAME_LEN], int ntables,
                              CatalogNode* out);

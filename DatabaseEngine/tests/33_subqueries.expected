@@ -1,0 +1,146 @@
+in-memory only, nothing will be saved
+
+db> 
+db> 
+db> 
+db> table users created with 3 column(s)
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 1 row inserted into users
+
+db> 
+db> table orders created with 2 column(s)
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> 1 row inserted into orders
+
+db> 
+db> table big created with 1 column(s)
+
+db> 1 row inserted into big
+
+db> 
+db> 
+db> name
+ada
+cy
+(2 rows)
+
+db> name
+bo
+(1 row)
+
+db> 
+db> 
+db> name
+ada
+cy
+(2 rows)
+
+db> name
+bo
+(1 row)
+
+db> name
+ada
+cy
+(2 rows)
+
+db> 
+db> 
+db> name
+cy
+(1 row)
+
+db> name | city
+ada | haifa
+bo | eilat
+(2 rows)
+
+db> 
+db> 
+db> name
+ada
+bo
+cy
+(3 rows)
+
+db> name
+(0 rows)
+
+db> name
+ada
+bo
+cy
+(3 rows)
+
+db> 
+db> 
+db> name
+ada
+cy
+(2 rows)
+
+db> 
+db> 
+db> users.name | orders.total
+ada | 250
+cy | 120
+(2 rows)
+
+db> 
+db> 
+db> 1 row(s) updated in users
+
+db> id | name | city
+2 | bo | eilat
+3 | cy | haifa
+1 | ada | moved
+(3 rows)
+
+db> 1 row(s) deleted from users
+
+db> id | name | city
+3 | cy | haifa
+1 | ada | moved
+(2 rows)
+
+db> 
+db> 
+db> 
+db> table t created with 2 column(s)
+
+db> 1 row inserted into t
+
+db> 1 row inserted into t
+
+db> table s created with 1 column(s)
+
+db> 1 row inserted into s
+
+db> 1 row inserted into s
+
+db> id
+1
+(1 row)
+
+db> id
+(0 rows)
+
+db> 
+db> 
+db> error 417: a subquery compared with an operator must return one row
+
+db> error 322: a subquery used here must return exactly one column
+
+db> error 300: no such table
+
+db> error 321: a subquery may not refer to a column of the outer query
+
+db> 

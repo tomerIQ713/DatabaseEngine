@@ -167,6 +167,19 @@ void exprLabel(const ExprPool* pool, int node, char* out, size_t size)
  * standing beside a column must be: "where day > '2024-01-01'" only knows the
  * text is a date because the column says so.
  */
+/*
+ * The name that last failed to resolve. Kept so that a caller which knows more
+ * about the context can say something better than "no such column" - the one
+ * that does is the subquery check, which can see whether the name would have
+ * resolved in the query outside and report a correlated subquery instead.
+ */
+static char unresolved[NAME_LEN];
+
+const char* exprUnresolvedColumn(void)
+{
+    return unresolved;
+}
+
 int exprResolve(const CatalogNode* table, ExprPool* pool, int node)
 {
     if (node < ZERO || node >= pool->count)
@@ -179,8 +192,10 @@ int exprResolve(const CatalogNode* table, ExprPool* pool, int node)
 
         if (current->slot == COLUMN_AMBIGUOUS)
             return ERROR_SEMANTIC_AMBIGUOUS_COLUMN;
-        if (current->slot < ZERO)
+        if (current->slot < ZERO) {
+            snprintf(unresolved, NAME_LEN, "%s", current->column);
             return ERROR_SEMANTIC_COLUMN_NOT_FOUND;
+        }
 
         current->type = table->cols[current->slot].type;
         return SUCCESS_CODE;

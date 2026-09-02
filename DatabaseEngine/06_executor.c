@@ -219,9 +219,19 @@ static void freeJoinTable(void)
     arenaRelease(&joinKeys);
 }
 
+/*
+ * What each subquery produced. Filled once per statement, before the outer
+ * query starts, which is what makes the whole feature small: by the time a row
+ * is tested, a subquery is not a query any more, only a set of values.
+ */
+static ResultSet subqueryResult[MAX_SUBQUERIES];
+
 void freeExecutor(void)
 {
     freeJoinTable();
+
+    for (int i = ZERO; i < MAX_SUBQUERIES; i++)
+        freeResultSet(&subqueryResult[i]);
 
     free(candidates);
     candidates        = NULL;
@@ -364,6 +374,37 @@ static TriState comparePredicate(const Value* value, const Value* other,
  * comparison UNKNOWN rather than failing the query, which is the same answer
  * NULL already gets and keeps one bad row from throwing away the rest.
  */
+
+/*
+ * x IN (values), against the one column the subquery returned.
+ *
+ * NULL follows SQL rather than intuition: a match is TRUE, but no match among
+ * values that include a NULL is UNKNOWN rather than FALSE, because the NULL
+ * might have been the match. That is why "x NOT IN (a set containing null)"
+ * returns nothing at all - NOT of unknown is still unknown.
+ */
+static TriState valueInResult(const Value* value, const ResultSet* set)
+{
+    if (value->isNull)
+        return TRI_UNKNOWN;
+
+    int sawNull = ZERO;
+
+    for (int r = ZERO; r < set->nrows; r++) {
+        const Value* candidate = &set->rows[r].values[ZERO];
+
+        if (candidate->isNull) {
+            sawNull = ONE;
+            continue;
+        }
+
+        if (comparePredicate(value, candidate, OP_EQ) == TRI_TRUE)
+            return TRI_TRUE;
+    }
+
+    return sawNull ? TRI_UNKNOWN : TRI_FALSE;
+}
+
 static TriState evaluateCondition(const Condition* cond, int node, const Row* row)
 {
     const ConditionNode* current = &cond->nodes[node];
@@ -373,11 +414,32 @@ static TriState evaluateCondition(const Condition* cond, int node, const Row* ro
         Value            left;
         Value            right;
 
+        if (compare->op == OP_EXISTS) {
+            const ResultSet* set = &subqueryResult[compare->subquery];
+            return set->nrows > ZERO ? TRI_TRUE : TRI_FALSE;
+        }
+
         if (exprEvaluate(&cond->exprs, compare->left, row, &left) != SUCCESS_CODE)
             return TRI_UNKNOWN;
 
         if (compare->op == OP_IS_NULL || compare->op == OP_IS_NOT_NULL)
             return comparePredicate(&left, &left, compare->op);
+
+        if (compare->op == OP_IN)
+            return valueInResult(&left, &subqueryResult[compare->subquery]);
+
+        if (compare->subquery >= ZERO) {
+            /* A scalar subquery that matched nothing is NULL, which is what
+               SQL says and what makes the comparison unknown. More than one
+               row was refused when it ran. */
+            const ResultSet* set = &subqueryResult[compare->subquery];
+
+            if (set->nrows == ZERO)
+                return TRI_UNKNOWN;
+
+            return comparePredicate(&left, &set->rows[ZERO].values[ZERO],
+                                    compare->op);
+        }
 
         if (exprEvaluate(&cond->exprs, compare->right, row, &right) != SUCCESS_CODE)
             return TRI_UNKNOWN;
@@ -426,6 +488,11 @@ static int resolveCondition(const CatalogNode* table, Condition* cond)
             continue;
 
         const Predicate* compare = &cond->nodes[i].compare;
+
+        /* EXISTS has no operands at all: it asks about a subquery, not about
+           this row, so there is nothing here to bind to a column. */
+        if (compare->op == OP_EXISTS)
+            continue;
 
         int errorCode = exprResolve(table, &cond->exprs, compare->left);
         if (errorCode != SUCCESS_CODE)
@@ -2749,8 +2816,56 @@ static int executeDropIndex(const char* name, ResultSet* out)
  * same tree walk, but it touches storage and fills a ResultSet instead of
  * appending C source to a buffer.
  */
+/*
+ * Runs every subquery the statement parsed, before the statement itself.
+ *
+ * Deepest first: parseSubquery takes its own slot before parsing what is
+ * inside it, so a nested subquery always has the higher index, and walking the
+ * pool backwards means a subquery's own subqueries have already produced their
+ * values by the time it runs.
+ *
+ * Doing this before the outer query starts is what makes it safe at all. The
+ * executor has one candidate array, one join heap and one group table, so a
+ * subquery running in the middle of an outer scan would be walking over the
+ * scan's own state. Nothing here overlaps: each subquery finishes completely,
+ * and only its ResultSet outlives it.
+ */
+static int materialiseSubqueries(void)
+{
+    int total = subqueryTotal();
+
+    for (int i = ZERO; i < MAX_SUBQUERIES; i++) {
+        freeResultSet(&subqueryResult[i]);
+        memset(&subqueryResult[i], ZERO, sizeof subqueryResult[i]);
+    }
+
+    for (int i = total - ONE; i >= ZERO; i--) {
+        SelectStatement* sub = subqueryAt(i);
+
+        if (sub == NULL)
+            return ERROR_SEMANTIC_TABLE_NOT_FOUND;
+
+        int errorCode = executeSelect(sub, &subqueryResult[i]);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        /* "x = (select ...)" wants one value. Nothing at all is NULL, which is
+           legal; two rows is a question with no answer. */
+        if (subqueryIsScalar(i) && subqueryResult[i].nrows > ONE)
+            return ERROR_EXEC_SUBQUERY_NOT_SCALAR;
+    }
+
+    return SUCCESS_CODE;
+}
+
 int executeStatement(Statement* statement, ResultSet* out)
 {
+    if (subqueryTotal() > ZERO) {
+        int errorCode = materialiseSubqueries();
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+    }
+
     switch (statement->type) {
     case STMT_CREATE_TABLE:
         return executeCreate(&statement->u.create, out);

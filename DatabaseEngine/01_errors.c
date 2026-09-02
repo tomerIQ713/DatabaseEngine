@@ -36,6 +36,7 @@ const char* errorCodeToString(int errorCode)
     case ERROR_SYNTAX_EXPECTED_SIZE:        return "expected a positive length in varchar(n)";
     case ERROR_SYNTAX_EXPECTED_TABLE:       return "expected the keyword table";
     case ERROR_SYNTAX_EXPECTED_TO:          return "expected the keyword to";
+    case ERROR_SYNTAX_TOO_MANY_SUBQUERIES:  return "too many subqueries in one statement";
     case ERROR_SYNTAX_EXPRESSION_TOO_COMPLEX: return "expression is too complex";
 
     case ERROR_SEMANTIC_TABLE_NOT_FOUND:    return "no such table";
@@ -59,6 +60,8 @@ const char* errorCodeToString(int errorCode)
     case ERROR_SEMANTIC_LAST_COLUMN:        return "cannot drop the only column of a table";
     case ERROR_SEMANTIC_ALTER_UNSUPPORTED:  return "unique, primary key and check are not supported on a new column";
     case ERROR_SEMANTIC_CHECK_BLOCKS_DROP:  return "cannot drop a column from a table with a check constraint";
+    case ERROR_SEMANTIC_CORRELATED_SUBQUERY: return "a subquery may not refer to a column of the outer query";
+    case ERROR_SEMANTIC_SUBQUERY_COLUMNS:   return "a subquery used here must return exactly one column";
 
     case ERROR_EXEC_TABLE_FULL:             return "table is full";
     case ERROR_EXEC_TOO_MANY_TABLES:        return "too many tables";
@@ -77,6 +80,7 @@ const char* errorCodeToString(int errorCode)
     case ERROR_EXEC_VALUE_TOO_LONG:         return "text is longer than the column allows";
     case ERROR_EXEC_DIVIDE_BY_ZERO:         return "division by zero";
     case ERROR_EXEC_TABLE_TOO_WIDE:         return "too many columns";
+    case ERROR_EXEC_SUBQUERY_NOT_SCALAR:    return "a subquery compared with an operator must return one row";
 
     case ERROR_IO_CANNOT_OPEN:              return "cannot open the database file";
     case ERROR_IO_BAD_FORMAT:               return "not a database file, or it is truncated";

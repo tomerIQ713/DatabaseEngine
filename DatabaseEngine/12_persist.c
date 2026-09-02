@@ -572,6 +572,10 @@ static int getCondition(Reader* reader, Condition* out, int* present)
         node->compare.left  = (int)operandLeft;
         node->compare.op    = (CompareOp)op;
         node->compare.right = (int)operandRight;
+        /* Not stored, because a CHECK cannot contain a subquery: the operator
+           check above is what guarantees that, so -1 is the only value a
+           loaded predicate can correctly have. */
+        node->compare.subquery = -ONE;
     }
 
     unsigned int operands;

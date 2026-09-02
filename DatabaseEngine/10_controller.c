@@ -31,6 +31,7 @@ int ProcessStatement(const char* sql, ResultSet* out)
     /* Everything this statement parses or reads is interned here, and none of
        it outlives the result set the caller is about to print. */
     resetTextArena();
+    resetSubqueries();
 
     out->ncols = ZERO;
     out->nrows = ZERO;

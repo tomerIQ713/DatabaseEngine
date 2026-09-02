@@ -66,6 +66,42 @@ int coerceLiteral(Value* value, ColType type)
     return ERROR_SEMANTIC_TYPE_MISMATCH;
 }
 
+static int checkSelect(SelectStatement* select);
+
+/*
+ * A subquery is checked on its own, against its own FROM.
+ *
+ * If that fails on a name, the name is asked of the outer query too: one that
+ * resolves there is a correlated subquery - legal SQL that this engine does
+ * not run, because an uncorrelated one is materialised once and a correlated
+ * one would have to be re-run per row, inside a scan that is already using the
+ * executor's shared state. Saying so is worth the extra lookup; "no such
+ * column: users.id" is a confusing way to report it.
+ */
+static int checkSubquery(const CatalogNode* outer, int index, int wantOneColumn)
+{
+    SelectStatement* sub = subqueryAt(index);
+
+    if (sub == NULL)
+        return ERROR_SEMANTIC_COLUMN_NOT_FOUND;
+
+    int errorCode = checkSelect(sub);
+
+    if (errorCode == ERROR_SEMANTIC_COLUMN_NOT_FOUND && outer != NULL
+        && findColumn(outer, exprUnresolvedColumn()) >= ZERO)
+        return ERROR_SEMANTIC_CORRELATED_SUBQUERY;
+
+    if (errorCode != SUCCESS_CODE)
+        return errorCode;
+
+    /* "x IN (select a, b from t)" has nothing to compare x with. A star is
+       counted as it stands, since the executor projects it the same way. */
+    if (wantOneColumn && !sub->selectAll && sub->nitems != ONE)
+        return ERROR_SEMANTIC_SUBQUERY_COLUMNS;
+
+    return SUCCESS_CODE;
+}
+
 /*
  * Walks the WHERE tree, checking every comparison against the table.
  */
@@ -77,6 +113,10 @@ static int checkCondition(const CatalogNode* table, Condition* cond, int node)
         Predicate* compare = &current->compare;
         ColType    left;
 
+        /* EXISTS has no left side, and asks only whether anything came back */
+        if (compare->op == OP_EXISTS)
+            return checkSubquery(table, compare->subquery, ZERO);
+
         int errorCode = exprResolve(table, &cond->exprs, compare->left);
 
         if (errorCode == SUCCESS_CODE)
@@ -87,6 +127,12 @@ static int checkCondition(const CatalogNode* table, Condition* cond, int node)
         /* IS NULL asks about a value's presence, whatever type it has */
         if (compare->op == OP_IS_NULL || compare->op == OP_IS_NOT_NULL)
             return SUCCESS_CODE;
+
+        /* IN, and any operator whose right side turned out to be a subquery.
+           Both compare the left side against values that do not exist yet, so
+           there is no type to agree with until the subquery has run. */
+        if (compare->op == OP_IN || compare->subquery >= ZERO)
+            return checkSubquery(table, compare->subquery, ONE);
 
         /* LIKE is a pattern over stored text, so it says nothing about a
            number or a day count and the left side has to be text. */

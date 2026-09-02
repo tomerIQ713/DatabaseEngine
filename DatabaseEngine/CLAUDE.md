@@ -88,7 +88,7 @@ One test at a time — the runner has no filter, so drive the engine directly:
 After an intentional behaviour change, read the diff first, then regenerate
 baselines with `./tests/run.sh --bless [exe]`. Baselines capture the banner and
 prompt too, so an edit to `showBanner` or the `db> ` prompt in `main.c` invalidates
-all 30 of them.
+all 33 of them.
 
 ## Running the engine
 
@@ -542,6 +542,71 @@ makes stale entries safe: DELETE and UPDATE tombstone rows without touching the
 trees, and UPDATE additionally appends the new row and its index entry. Only VACUUM
 compacts the heap and rebuilds indexes. Do not "optimise" away the re-verification.
 
+**An outer join's ON is not a filter, and that is the whole difference.** An
+inner join's ON is ANDed into the WHERE by `addCondition`, because for an inner
+join pairing and filtering are the same question. A LEFT JOIN's is not: its left
+row survives whether or not the ON matched, so `SelectStatement.onRoot[t]` holds
+that subtree's root apart from the WHERE while the nodes stay in the same pool.
+Nothing about how conditions are stored, resolved or evaluated had to change.
+
+Three things follow, and `tests/32_left_join.sql` pins each:
+
+- **Each level of the nested loop applies its own ON** and remembers whether
+  anything matched. `matched` is a local, and `joinTables` is called once per
+  left prefix, so it is asking exactly the right question.
+- **A level that matched nothing completes the row with NULLs** and passes it
+  down, which is why the NULLs of one level reach the next in a chain.
+- **The hash join is skipped when any table is outer.** It drops left rows that
+  find no partner, which is precisely what an outer join must not do.
+
+The distinction worth remembering: `on a.id = b.uid and b.total > 100` keeps the
+unmatched left row, `where b.total > 100` does not. Both are correct SQL and
+they mean different things.
+
+**A subquery is materialised before the outer query starts.** `MAX_SUBQUERIES`
+of them live in a pool in `04_parser.c` - a `SelectStatement` is about 18 KB, so
+a statement cannot hold the ones it mentions without the type becoming recursive
+and enormous - and a `Predicate` keeps an index into it, which is also what
+keeps a `Condition` a flat thing that copies by value.
+
+`materialiseSubqueries` runs them all at the top of `executeStatement`, and that
+ordering is what makes the feature small and safe at once:
+
+- **By the time a row is tested, a subquery is not a query any more**, only a
+  set of values. `OP_IN` scans that set, `OP_EXISTS` asks whether it is empty,
+  and a scalar one reads `rows[0]`.
+- **Deepest first.** `parseSubquery` takes its own slot before parsing what is
+  inside it, so a nested subquery always has the higher index and the pool is
+  walked backwards.
+- **Nothing overlaps.** The executor has one candidate array, one join heap and
+  one group table; a subquery running inside an outer scan would be walking over
+  that scan's own state. Running them all before the outer query starts is what
+  stops that, and it is the reason **correlated subqueries are refused** rather
+  than supported - they would have to be re-run per row, in exactly that
+  position. `checkSubquery` asks the outer schema about a name the subquery
+  could not resolve, so the error says so instead of "no such column".
+- **`IN (a, b, c)` is not a subquery at all.** The parser rewrites it into
+  `x = a OR x = b OR ...`, which is not a shortcut but the definition, NULL
+  behaviour included: an OR of unknowns is unknown, exactly as `IN` against a
+  set containing NULL is. Only the subquery form needs an operator of its own.
+- **`parseSubquery`'s token list is a local, not a static.** It recurses for a
+  nested subquery, and a shared buffer is overwritten by the inner call while
+  the outer `parseSelect` is still reading it.
+
+**ALTER TABLE ADD and DROP COLUMN rewrite every row.** A record carries its own
+column count and its fields are variable-length, so a row written before the
+change cannot be reinterpreted in place. Both do what VACUUM does - rewrite the
+heap, rebuild the indexes - with the transformation applied on the way through,
+and the rewrite collects live positions *before* it starts, because inserting
+into the heap being scanned appends rows the scan then walks into.
+
+Dropping a column drops the indexes on it and shifts the slot of every index on
+a later column. Renaming touches names only. What ALTER refuses, and why:
+UNIQUE and PRIMARY KEY on a new column, and NOT NULL without a DEFAULT when the
+table has rows, each assert something about rows that already exist; dropping a
+column from a table with a CHECK would shift the slot positions that CHECK was
+compiled against.
+
 **Index selection only walks AND spines.** `findIndexableLeaf` never descends into
 OR or NOT, because a matching leaf there does not constrain the result.
 
@@ -660,7 +725,7 @@ Touches five places, in order: keyword and `TokenType` in `sql_common.h` plus th
 keyword table in `03_lexer.c`; a statement struct, a `StatementType`, and a union
 member in `sql_common.h`; a `parseX` in `04_parser.c` plus dispatch in
 `parseStatement`; a case in `semanticCheck`; an `executeX` plus dispatch in
-`executeStatement`. Then a `tests/NN_name.sql` / `.expected` pair.
+`executeStatement`. Then a `tests/NN_name.sql` / `.expected` pair. **One statement per line** - the engine reads a line at a time, so a statement wrapped across two lines parses as two, and the first half usually still parses.
 
 ### Persistence format
 

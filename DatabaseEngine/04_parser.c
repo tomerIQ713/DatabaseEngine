@@ -11,6 +11,105 @@ static TokenType typeAt(const TokenList* tokens, int index)
     return index < tokens->count ? tokens->tokens[index].type : TOKEN_UNKNOWN;
 }
 
+static int parseSelect(const TokenList* tokens, SelectStatement* out);
+
+/*
+ * Subqueries.
+ *
+ * A SelectStatement is about 18 KB, so a statement cannot hold the ones it
+ * mentions - the type would be recursive and the statement enormous. They live
+ * here instead and a Predicate keeps an index, which also means a Condition is
+ * still a flat thing that copies by value.
+ *
+ * The pool is emptied at the start of every statement, so an index is valid
+ * for exactly as long as the statement that parsed it - the same lifetime the
+ * statement arena gives to text.
+ */
+static SelectStatement subqueryPool[MAX_SUBQUERIES];
+static int             subqueryScalar[MAX_SUBQUERIES];
+static int             subqueryCount;
+
+void resetSubqueries(void)
+{
+    subqueryCount = ZERO;
+}
+
+int subqueryTotal(void)
+{
+    return subqueryCount;
+}
+
+/* Set where the parser knows it: on the right of a comparison operator, one
+   value is wanted, and more than one row back is an error rather than a set. */
+int subqueryIsScalar(int index)
+{
+    return index >= ZERO && index < subqueryCount ? subqueryScalar[index] : ZERO;
+}
+
+SelectStatement* subqueryAt(int index)
+{
+    return index >= ZERO && index < subqueryCount ? &subqueryPool[index] : NULL;
+}
+
+/*
+ * ( select ... ) in a position where a value or a set is expected.
+ */
+static int parseSubquery(const TokenList* tokens, int* index, int* out)
+{
+    int i = *index;
+
+    if (typeAt(tokens, i) != TOKEN_LPAREN
+        || typeAt(tokens, i + ONE) != TOKEN_KEYWORD_SELECT)
+        return ERROR_SYNTAX_EXPECTED_PARENTHESES;
+
+    if (subqueryCount == MAX_SUBQUERIES)
+        return ERROR_SYNTAX_TOO_MANY_SUBQUERIES;
+
+    i++;                                        /* past the '(' */
+
+    /* parseSelect wants a statement of its own, and reads to the end of the
+       token list - so the inner SELECT is lifted into a list of its own,
+       stopping at the parenthesis that closes it.
+       A local rather than a static: this recurses for a nested subquery, and a
+       shared one would be overwritten by the inner call while the outer
+       parseSelect was still reading it. At 1.6 KB and a depth bounded by
+       MAX_SUBQUERIES, the stack is the right place for it. */
+    TokenList inner;
+    int       depth = ONE;
+    int       at    = i;
+
+    inner.count = ZERO;
+
+    while (at < tokens->count) {
+        TokenType type = tokens->tokens[at].type;
+
+        if (type == TOKEN_LPAREN)
+            depth++;
+        else if (type == TOKEN_RPAREN && --depth == ZERO)
+            break;
+
+        if (inner.count == MAX_TOKENS)
+            return ERROR_TOO_MANY_TOKENS;
+
+        inner.tokens[inner.count++] = tokens->tokens[at++];
+    }
+
+    if (depth != ZERO)
+        return ERROR_SYNTAX_EXPECTED_PARENTHESES;
+
+    int slot = subqueryCount++;
+
+    subqueryScalar[slot] = ZERO;
+
+    int errorCode = parseSelect(&inner, &subqueryPool[slot]);
+    if (errorCode != SUCCESS_CODE)
+        return errorCode;
+
+    *out   = slot;
+    *index = at + ONE;                          /* past the ')' */
+    return SUCCESS_CODE;
+}
+
 /*
  * Accepts an optional trailing semicolon, then requires the end of input.
  */
@@ -340,8 +439,93 @@ static int parseComparison(const TokenList* tokens, int* index,
 
     Predicate* compare = &out->nodes[*node].compare;
 
-    compare->left  = left;
-    compare->right = -1;                    /* IS NULL never fills it in */
+    compare->left     = left;
+    compare->right    = -1;                 /* IS NULL never fills it in */
+    compare->subquery = -1;                 /* set only by IN and EXISTS */
+
+    /* [NOT] IN: either a subquery, or a list of values.
+     *
+     * The list form is rewritten into "x = a OR x = b OR ...", which is not a
+     * shortcut but the definition - including what it does with NULL, since an
+     * OR of unknowns is unknown exactly as IN against a NULL is. The subquery
+     * form cannot be rewritten that way because its values are not known until
+     * it runs, so that one gets an operator of its own.
+     */
+    if (typeAt(tokens, i) == TOKEN_KEYWORD_IN
+        || (typeAt(tokens, i) == TOKEN_KEYWORD_NOT
+            && typeAt(tokens, i + ONE) == TOKEN_KEYWORD_IN)) {
+
+        int negated = typeAt(tokens, i) == TOKEN_KEYWORD_NOT;
+
+        i += negated ? TWO : ONE;
+
+        if (typeAt(tokens, i + ONE) == TOKEN_KEYWORD_SELECT) {
+            compare->op = OP_IN;
+
+            errorCode = parseSubquery(tokens, &i, &compare->subquery);
+            if (errorCode != SUCCESS_CODE)
+                return errorCode;
+        }
+        else {
+            if (typeAt(tokens, i++) != TOKEN_LPAREN)
+                return ERROR_SYNTAX_EXPECTED_PARENTHESES;
+
+            /* The node already allocated becomes the first equality; each
+               further value adds another and an OR above it. */
+            int spine = *node;
+
+            for (;;) {
+                Predicate* term = &out->nodes[spine].compare;
+
+                if (spine != *node) {
+                    term->left     = left;
+                    term->subquery = -1;
+                }
+
+                term->op = OP_EQ;
+
+                errorCode = parseExpression(tokens, &i, &out->exprs, &term->right);
+                if (errorCode != SUCCESS_CODE)
+                    return errorCode;
+
+                if (typeAt(tokens, i) != TOKEN_COMMA)
+                    break;
+                i++;
+
+                int next;
+                errorCode = newCondition(out, COND_COMPARE, &next);
+                if (errorCode != SUCCESS_CODE)
+                    return errorCode;
+
+                int either;
+                errorCode = newCondition(out, COND_OR, &either);
+                if (errorCode != SUCCESS_CODE)
+                    return errorCode;
+
+                out->nodes[either].left  = *node;
+                out->nodes[either].right = next;
+                *node = either;
+                spine = next;
+            }
+
+            if (typeAt(tokens, i++) != TOKEN_RPAREN)
+                return ERROR_SYNTAX_EXPECTED_PARENTHESES;
+        }
+
+        if (negated) {
+            int inverted;
+
+            errorCode = newCondition(out, COND_NOT, &inverted);
+            if (errorCode != SUCCESS_CODE)
+                return errorCode;
+
+            out->nodes[inverted].left = *node;
+            *node = inverted;
+        }
+
+        *index = i;
+        return SUCCESS_CODE;
+    }
 
     if (typeAt(tokens, i) == TOKEN_KEYWORD_IS) {
         i++;
@@ -400,6 +584,22 @@ static int parseComparison(const TokenList* tokens, int* index,
     }
     i++;
 
+    /* "x = (select ...)" compares against whatever the subquery produced, so
+       the right side is a subquery rather than an expression. It has to return
+       one row, which is not knowable here - the executor says so. */
+    if (typeAt(tokens, i) == TOKEN_LPAREN
+        && typeAt(tokens, i + ONE) == TOKEN_KEYWORD_SELECT) {
+
+        errorCode = parseSubquery(tokens, &i, &compare->subquery);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        subqueryScalar[compare->subquery] = ONE;
+
+        *index = i;
+        return SUCCESS_CODE;
+    }
+
     /* Whatever is on the right is an expression too, so a literal, another
        column and "b + 1" are the same case. */
     errorCode = parseExpression(tokens, &i, &out->exprs, &compare->right);
@@ -422,6 +622,29 @@ static int parseComparison(const TokenList* tokens, int* index,
 static int parsePrimary(const TokenList* tokens, int* index,
                         Condition* out, int* node, int allowAggregate)
 {
+    /* EXISTS is a condition on its own rather than a comparison, so it is
+       recognised here instead of in parseComparison: there is no left side. */
+    if (typeAt(tokens, *index) == TOKEN_KEYWORD_EXISTS) {
+        int i = *index + ONE;
+
+        int errorCode = newCondition(out, COND_COMPARE, node);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        Predicate* compare = &out->nodes[*node].compare;
+
+        compare->left  = -1;
+        compare->right = -1;
+        compare->op    = OP_EXISTS;
+
+        errorCode = parseSubquery(tokens, &i, &compare->subquery);
+        if (errorCode != SUCCESS_CODE)
+            return errorCode;
+
+        *index = i;
+        return SUCCESS_CODE;
+    }
+
     if (typeAt(tokens, *index) == TOKEN_LPAREN) {
         int i = *index + ONE;
 

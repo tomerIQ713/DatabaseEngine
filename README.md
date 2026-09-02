@@ -120,11 +120,18 @@ A page that fails becomes an error rather than an empty table.
 rather than rebuilt by scanning. Entry size follows the key type; float keys are
 stored as order-preserving integers so one comparison serves every type.
 
-**SQL.** Selection, projection, joins (hash join on an equality, nested loop
-otherwise), `GROUP BY` with aggregates, `HAVING`, `ORDER BY` (top-N when there's
-a `LIMIT`), `DISTINCT`, `LIKE`, arithmetic expressions, `NULL` with proper
-tri-state logic, constraints (`PRIMARY KEY`, `UNIQUE`, `NOT NULL`, `DEFAULT`,
-`CHECK`), and the types `int`, `text`, `float`, `date`, `varchar(n)`.
+**SQL.** Selection, projection, `INNER` and `LEFT OUTER JOIN` (hash join on an
+equality, nested loop otherwise), subqueries (`IN`, `NOT IN`, `EXISTS`, and a
+scalar on the right of an operator), `GROUP BY` with aggregates, `HAVING`,
+`ORDER BY` (top-N when there's a `LIMIT`), `DISTINCT`, `LIKE`, arithmetic
+expressions, `NULL` with proper tri-state logic, constraints (`PRIMARY KEY`,
+`UNIQUE`, `NOT NULL`, `DEFAULT`, `CHECK`), `ALTER TABLE`, `VACUUM`, and the
+types `int`, `text`, `float`, `date`, `varchar(n)`.
+
+The NULL semantics are the real ones, not an approximation: `x NOT IN (a set
+containing NULL)` correctly returns nothing, `count(col)` over an outer join's
+unmatched row correctly counts zero, and `ON` and `WHERE` on an outer join mean
+different things.
 
 **Wire protocol.** PostgreSQL v3, both the simple and the extended query
 protocol.
@@ -155,10 +162,29 @@ this short. The nested loop this join replaced took 2.96 s on the same data.
 Design decisions behind these, and the measurements taken while making them,
 are in the design notes below.
 
+## What it does not do
+
+Worth knowing before you reach for it:
+
+- **One connection at a time.** The engine is a single set of globals - one
+  catalog, one buffer pool, one open transaction - so two sessions at once
+  would be two sessions sharing one database's worth of state. This is the
+  real distance between it and a production database, and it is larger than
+  any missing SQL.
+- **No correlated subqueries.** An uncorrelated one is run once before the
+  outer query starts; a correlated one would have to be re-run per row, inside
+  a scan already using the executor's shared state. It is refused with an
+  error that says so, never answered wrongly.
+- **No `RIGHT`/`FULL JOIN`, no `UNION`, no subqueries in `FROM`.**
+- **No authentication.** Do not expose the port to a network you do not
+  control.
+- **psql's backslash commands don't work** - `\d` and friends are SQL against
+  `pg_catalog`, with joins and casts this engine doesn't have. Typed SQL does.
+
 ## Tests
 
 ```bash
-./tests/run.sh ./db          # 30 golden-file tests
+./tests/run.sh ./db          # 33 golden-file tests
 ./tests/recovery.sh ./db     # 16 crash-recovery tests (kills the process mid-session)
 ./tests/wire.sh ./db         # 30 protocol tests (needs python3)
 ./tests/bench.sh ./db        # the table above
