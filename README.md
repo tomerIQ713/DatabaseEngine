@@ -1,7 +1,5 @@
 # DatabaseEngine
 
-[![CI](https://github.com/tomerIQ713/DatabaseEngine/actions/workflows/ci.yml/badge.svg)](https://github.com/tomerIQ713/DatabaseEngine/actions/workflows/ci.yml)
-
 A SQL database engine written from scratch in C99 — no dependencies, no
 libraries, about 14,700 lines. It has a buffer pool, write-ahead logging with
 crash recovery, persistent B+ tree indexes, checksummed pages, and it speaks
