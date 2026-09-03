@@ -21,6 +21,7 @@ work="$dir/wire_tmp"
 rm -rf "$work"; mkdir -p "$work"
 
 "$db" "$work/w.db" --port "$port" > "$work/server.log" 2>&1 &
+server=$!
 
 # give it a moment to bind before the client knocks
 sleep 2
@@ -28,13 +29,17 @@ sleep 2
 python3 "$dir/wire.py" "$port"
 result=$?
 
-# the engine serves until it is killed; there is no quit over the wire
-if command -v taskkill > /dev/null 2>&1; then
-    taskkill //F //IM "$(basename "$db")" > /dev/null 2>&1
-else
-    pkill -9 -f "$(basename "$db")" > /dev/null 2>&1
+# By pid, not by name: pkill -f matches a substring of every command line on
+# the machine, this script's own included.
+kill -9 "$server" > /dev/null 2>&1
+wait "$server" 2>/dev/null
+
+# The server's own output is the only account of why it died - a sanitizer
+# report lands there and nowhere else, so a failure must not throw it away.
+if [ "$result" != "0" ]; then
+    echo "--- server log ---"
+    cat "$work/server.log"
 fi
 
-sleep 1
 rm -rf "$work"
 exit $result

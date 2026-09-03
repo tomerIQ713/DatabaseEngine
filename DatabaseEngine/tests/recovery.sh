@@ -24,13 +24,19 @@ check() {                                   # check <name> <expected> <actual>
     fi
 }
 
+# Kills the engine started by the previous background pipeline, by the pid the
+# shell recorded for it.
+#
+# Not by name: taskkill matches an exact image name, but pkill -f matches a
+# substring of every command line on the machine, and "db" appears in this
+# script's own. That killed the test run itself on Linux - exit 137 - while
+# looking perfectly fine on Windows.
 kill_engine() {
-    # the engine is the only process holding this database open
-    if command -v taskkill > /dev/null 2>&1; then
-        taskkill //F //IM "$(basename "$db")" > /dev/null 2>&1
-    else
-        pkill -9 -f "$(basename "$db")" > /dev/null 2>&1
-    fi
+    [ -n "$engine" ] || return 0
+
+    kill -9 "$engine" > /dev/null 2>&1
+    wait "$engine" 2>/dev/null
+    engine=""
     sleep 1
 }
 
@@ -41,8 +47,9 @@ kill_engine() {
     printf "insert into t values (2, 'beta');\n"
     printf 'create index t_id on t (id);\n'
     printf "insert into t values (3, 'gamma');\n"
-    sleep 30
+    sleep 10
 } | "$db" "$file" > /dev/null 2>&1 &
+engine=$!
 
 sleep 3
 [ -f "$file-wal" ] && wal=yes || wal=no
@@ -68,8 +75,9 @@ check "a clean exit folds the log away" "no" "$after"
 {
     printf "insert into t values (4, 'delta');\n"
     printf "insert into t values (5, 'epsilon');\n"
-    sleep 30
+    sleep 10
 } | "$db" "$file" > /dev/null 2>&1 &
+engine=$!
 
 sleep 3
 kill_engine
@@ -137,8 +145,9 @@ gone="$work/gone.db"
 {
     printf 'create table t (id int);\n'
     printf 'insert into t values (1);\n'
-    sleep 30
+    sleep 10
 } | "$db" "$gone" > /dev/null 2>&1 &
+engine=$!
 sleep 3
 kill_engine
 {
@@ -161,8 +170,9 @@ open_txn="$work/open.db"
     printf 'begin;\n'
     printf 'insert into t values (2);\n'
     printf 'insert into t values (3);\n'
-    sleep 30
+    sleep 10
 } | "$db" "$open_txn" > /dev/null 2>&1 &
+engine=$!
 sleep 3
 kill_engine
 check "a crash inside a transaction loses it whole" "1" "$(count "$open_txn")"
@@ -175,8 +185,9 @@ closed_txn="$work/closed.db"
     printf 'insert into t values (2);\n'
     printf 'commit;\n'
     printf 'insert into t values (3);\n'
-    sleep 30
+    sleep 10
 } | "$db" "$closed_txn" > /dev/null 2>&1 &
+engine=$!
 sleep 3
 kill_engine
 check "a committed transaction survives one" "3" "$(count "$closed_txn")"
@@ -245,8 +256,9 @@ printf 'create table seed (i int);\ninsert into seed values (1);\n.exit\n' \
 
 {
     printf 'create table ghost (i int);\n'
-    sleep 30
+    sleep 10
 } | "$db" "$crashed" > /dev/null 2>&1 &
+engine=$!
 
 sleep 3
 kill_engine

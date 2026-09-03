@@ -26,11 +26,13 @@ sleep 2
 python3 "$dir/parallel.py" "$port" "${ROWS:-3000}"
 result=$?
 
-kill "$server" > /dev/null 2>&1
-if command -v taskkill > /dev/null 2>&1; then
-    taskkill //F //PID "$server" > /dev/null 2>&1
-fi
+kill -9 "$server" > /dev/null 2>&1
 wait "$server" 2>/dev/null
+
+if [ "$result" != "0" ]; then
+    echo "--- server log ---"
+    cat "$dir/parallel_server.log"
+fi
 
 rm -f "$dir/parallel_server.log"
 exit $result
