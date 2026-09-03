@@ -418,7 +418,9 @@ static int parseComparison(const TokenList* tokens, int* index,
            survives, and the condition's pool stays free of operands nothing
            will ever evaluate. Static because it is large and this is never
            re-entered - parseSelectItem cannot reach another comparison. */
-        static ExprPool discard;
+        /* Per thread: parsing deliberately runs before the engine lock is
+           taken, so two connections are in here at once. */
+        static THREAD_LOCAL ExprPool discard;
 
         exprInit(&discard);
 

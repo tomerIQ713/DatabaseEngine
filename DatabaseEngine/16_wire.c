@@ -141,6 +141,12 @@ typedef struct Session {
    code below takes a lock to touch it. */
 static THREAD_LOCAL Session* self;
 
+/* Scratch for describing a statement: a result set that is thrown away, and
+   the statement text with stand-in parameters filled in. Per thread like
+   everything else here, which means the ResultSet is this thread's to free. */
+static THREAD_LOCAL ResultSet probeShape;
+static THREAD_LOCAL char      probeSql[LINE_LEN];
+
 /* The count of live connections lives with the lock that guards it, in
    18_thread.c - see sessionAcquire. */
 
@@ -259,8 +265,11 @@ static int readExactly(unsigned char* into, size_t length)
  * length has to be known before the body is written. Every message here is
  * built into one buffer first for that reason.
  */
-static unsigned char message[WIRE_BUFFER];
-static size_t        messageUsed;
+/* Per thread. A message is assembled here before its length is known, and two
+   connections building responses at once would write over each other - which
+   is a corrupted protocol stream, not merely a race. */
+static THREAD_LOCAL unsigned char message[WIRE_BUFFER];
+static THREAD_LOCAL size_t        messageUsed;
 
 static void startMessage(void)
 {
@@ -1094,9 +1103,6 @@ static int handleDescribe(Body* body)
         if (strcmp(verb, "SELECT") != ZERO)
             return sendSimple('n');             /* NoData */
 
-        static ResultSet shape;
-        static char      probe[LINE_LEN];
-
         errorCode = ERROR_SYNTAX_EXPECTED_VALUE;
 
         for (int attempt = ZERO;
@@ -1118,20 +1124,20 @@ static int handleDescribe(Body* body)
                the types unsaid and still write $1, and the probe has a
                stand-in ready for all of them either way. */
             if (substituteParameters(statement->sql, statement, stand, lengths,
-                                     MAX_PARAMS, ONE, probe, sizeof probe)
+                                     MAX_PARAMS, ONE, probeSql, sizeof probeSql)
                 != SUCCESS_CODE)
                 return failExtended(ERROR_SYNTAX_EXPECTED_VALUE);
 
-            errorCode = ProcessStatement(probe, &shape);
+            errorCode = ProcessStatement(probeSql, &probeShape);
         }
 
         if (errorCode != SUCCESS_CODE)
             return failExtended(errorCode);
 
-        if (shape.ncols == ZERO)
+        if (probeShape.ncols == ZERO)
             return sendSimple('n');             /* NoData */
 
-        return sendRowDescription(&shape);
+        return sendRowDescription(&probeShape);
     }
 
     int errorCode = runPortal();
@@ -1235,7 +1241,7 @@ static int handshake(void)
         if (length < 8 || length > WIRE_BUFFER)
             return ERROR_IO_BAD_FORMAT;
 
-        static unsigned char body[WIRE_BUFFER];
+        static THREAD_LOCAL unsigned char body[WIRE_BUFFER];
 
         errorCode = readExactly(body, length - 4);
         if (errorCode != SUCCESS_CODE)
@@ -1331,7 +1337,9 @@ static int serveMessage(ResultSet* results)
     if (length < 4 || length > WIRE_BUFFER)
         return ERROR_IO_BAD_FORMAT;
 
-    static unsigned char body[WIRE_BUFFER];
+    /* Per thread: one connection's incoming message must not land in the
+       buffer another is still parsing its SQL out of. */
+    static THREAD_LOCAL unsigned char body[WIRE_BUFFER];
 
     body[ZERO] = ZERO;
     if (length > 4 && readExactly(body, length - 4) != SUCCESS_CODE)
@@ -1418,6 +1426,7 @@ static void closeSession(void)
        as well as winding back, which is all this needs. */
     freeExecutor();
     resetTextArena();
+    freeResultSet(&probeShape);
 
     sessionRelease();
 
