@@ -169,10 +169,15 @@ void dateToText(int days, char* out)
     civilFromDays(days, &year, &month, &day);
 
     /* A date is a day count, and an int day count reaches years no calendar
-       has - so the fields are written at a fixed width rather than trusting
-       the range. The buffer is DATE_TEXT_LEN and the widths add up to it. */
-    snprintf(out, DATE_TEXT_LEN, "%04d-%02d-%02d",
-             year % 10000, month % 100, day % 100);
+       has. Reduced through unsigned so the ranges are provably 0-9999 and
+       0-99: that is 4 + 1 + 2 + 1 + 2 characters and the terminator, which is
+       exactly DATE_TEXT_LEN, so nothing can be truncated. Signed % keeps the
+       sign and leaves the compiler unable to say that. */
+    unsigned int y = (unsigned int)year  % 10000u;
+    unsigned int m = (unsigned int)month % 100u;
+    unsigned int d = (unsigned int)day   % 100u;
+
+    snprintf(out, DATE_TEXT_LEN, "%04u-%02u-%02u", y, m, d);
 }
 
 /*

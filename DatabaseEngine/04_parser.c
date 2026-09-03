@@ -1203,7 +1203,12 @@ static int parseSelect(const TokenList* tokens, SelectStatement* out)
         if (typeAt(tokens, index) == TOKEN_IDENTIFIER)
             snprintf(out->aliases[slot], NAME_LEN, "%s", tokens->tokens[index++].value);
         else
-            snprintf(out->aliases[slot], NAME_LEN, "%s", out->tables[slot]);
+            /* memcpy, not snprintf: both are members of the same statement
+               and snprintf's arguments are restrict-qualified, so the
+               compiler cannot prove they do not overlap. They are separate
+               arrays of exactly this size, and copying all of it is both
+               correct and cheaper than formatting. */
+            memcpy(out->aliases[slot], out->tables[slot], NAME_LEN);
 
         if (expectOn) {
             if (typeAt(tokens, index++) != TOKEN_KEYWORD_ON)

@@ -23,7 +23,9 @@
 typedef int SOCKET;
 #define INVALID_SOCKET (-1)
 #define closesocket    close
-#define WSAStartup(v, d) (ZERO)
+/* Takes its arguments so that the WSADATA the caller declares is used on
+   this side too, rather than warned about. */
+#define WSAStartup(v, d) ((void)(v), (void)(d), ZERO)
 #define WSACleanup()     ((void)ZERO)
 #define MAKEWORD(a, b)   (ZERO)
 typedef int WSADATA;
@@ -499,7 +501,11 @@ static void commandTag(const char* sql, const ResultSet* results, char* out, siz
         takeWord(rest, object);
 
         if (object[ZERO] != '\0') {
-            snprintf(out, size, "%s %s", verb, object);
+            /* Widths, so the truncation is stated rather than inferred:
+               either word can be a whole identifier, and the caller's buffer
+               is smaller than two of them. */
+            snprintf(out, size, "%.*s %.*s",
+                     NAME_LEN / TWO, verb, NAME_LEN / TWO, object);
             return;
         }
     }
