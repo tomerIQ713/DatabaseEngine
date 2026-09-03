@@ -271,8 +271,11 @@ check "and survives a crash, having reported success" "1" "$survived"
 # ALTER changes the catalog in memory as well as on the page, and ROLLBACK puts
 # it back by re-reading the catalog - the same reload that restores the rows.
 schema="$work/s.db"
-printf "create table t (a int, b text);\ninsert into t values (1, \'x\');\n.exit\n" \
-    | "$db" "$schema" > /dev/null 2>&1
+"$db" "$schema" > /dev/null 2>&1 <<'SQL'
+create table t (a int, b text);
+insert into t values (1, 'x');
+.exit
+SQL
 
 # .tables prints one line per table, so the catalog is read straight off it
 rolled=$(printf 'begin;\nalter table t add column c int default 9;\nalter table t rename to renamed;\nrollback;\n.tables\n.exit\n' \

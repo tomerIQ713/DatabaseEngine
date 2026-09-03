@@ -316,13 +316,21 @@ static int sendMessage(char type)
 
 /*
  * 'Z', which every exchange ends with. The status byte is what puts psql's
- * prompt into its "you are in a transaction" form, so it is read from the
- * engine rather than assumed.
+ * prompt into its "you are in a transaction" form.
+ *
+ * It asks this session, not the engine. Both matter. Semantically, the byte
+ * answers "are *you* in a transaction" - another connection's transaction is
+ * none of this client's business, and reporting it would put a 'T' on the
+ * prompt of a session that never began one. Mechanically, the engine's flag
+ * is a shared global and this runs during the handshake, before any statement
+ * has taken the engine lock: ThreadSanitizer caught it being read here while
+ * another connection's teardown was rolling back and writing it. The
+ * session's own answer is thread-local, so there is nothing to race with.
  */
 static int sendReadyForQuery(void)
 {
     startMessage();
-    addBytes(inTransaction() ? "T" : "I", ONE);
+    addBytes(engineInTransaction() ? "T" : "I", ONE);
 
     int errorCode = sendMessage('Z');
 
