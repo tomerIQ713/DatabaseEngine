@@ -17,12 +17,12 @@ typedef struct {
  * Keys and accumulators are flat arrays indexed by group * MAX_COLS + column.
  * The bucket array holds group index + 1, so zero means empty.
  */
-static Value*      groupKeys;
-static Accumulator* accumulators;
-static int         groupCapacity;
+static THREAD_LOCAL Value*      groupKeys;
+static THREAD_LOCAL Accumulator* accumulators;
+static THREAD_LOCAL int         groupCapacity;
 
-static int*        groupBuckets;
-static int         bucketCount;
+static THREAD_LOCAL int*        groupBuckets;
+static THREAD_LOCAL int         bucketCount;
 
 /*
  * How many keys and accumulators one group takes. These were MAX_COLS each,
@@ -30,12 +30,12 @@ static int         bucketCount;
  * group and copied all sixteen every time the table doubled: half a kilobyte a
  * group where thirty-two bytes would do.
  */
-static int groupKeyStride;
-static int groupAccStride;
+static THREAD_LOCAL int groupKeyStride;
+static THREAD_LOCAL int groupAccStride;
 
 /* Each group's hash, so growing the table does not have to compute it again.
    Rehashing 50,000 text keys ten times over is most of a millisecond. */
-static unsigned int* groupHashes;
+static THREAD_LOCAL unsigned int* groupHashes;
 
 /*
  * Grouping keeps values from rows it has otherwise finished with - the key of
@@ -43,7 +43,7 @@ static unsigned int* groupHashes;
  * statement arena, because the scan winds that back after every row, so it is
  * copied here and released when the next grouping starts.
  */
-static Arena groupArena;
+static THREAD_LOCAL Arena groupArena;
 
 static Value* keyAt(int group, int column)
 {
@@ -134,7 +134,7 @@ static void retain(Value* target, const Value* source)
         target->text = arenaCopy(&groupArena, valueText(source), source->textLength);
 }
 
-static int explainEnabled;
+static THREAD_LOCAL int explainEnabled;
 
 static void freeOrder(void);
 
@@ -143,16 +143,16 @@ static void freeOrder(void);
  * than an array per caller, because a table scan can now return far more
  * positions than a stack frame will hold.
  */
-static int* candidates;
-static int  candidateCapacity;
+static THREAD_LOCAL int* candidates;
+static THREAD_LOCAL int  candidateCapacity;
 
 /*
  * Row positions an index handed back for a uniqueness probe. Separate from the
  * shared candidate array on purpose: UPDATE is holding its rows in that one
  * while it asks whether each new value is already taken.
  */
-static int* probeRows;
-static int  probeCapacity;
+static THREAD_LOCAL int* probeRows;
+static THREAD_LOCAL int  probeCapacity;
 
 static int reserveProbe(int rows)
 {
@@ -200,11 +200,11 @@ typedef struct {
     int          position;
 } JoinEntry;
 
-static JoinEntry* joinEntries;
-static int        joinEntryCapacity;
-static int*       joinBuckets;          /* entry index + 1; zero means empty */
-static int        joinBucketCount;
-static Arena      joinKeys;             /* build-side key text */
+static THREAD_LOCAL JoinEntry* joinEntries;
+static THREAD_LOCAL int        joinEntryCapacity;
+static THREAD_LOCAL int*       joinBuckets;          /* entry index + 1; zero means empty */
+static THREAD_LOCAL int        joinBucketCount;
+static THREAD_LOCAL Arena      joinKeys;             /* build-side key text */
 
 static void freeJoinTable(void)
 {
@@ -224,7 +224,7 @@ static void freeJoinTable(void)
  * query starts, which is what makes the whole feature small: by the time a row
  * is tested, a subquery is not a query any more, only a set of values.
  */
-static ResultSet subqueryResult[MAX_SUBQUERIES];
+static THREAD_LOCAL ResultSet subqueryResult[MAX_SUBQUERIES];
 
 void freeExecutor(void)
 {
@@ -1911,13 +1911,13 @@ static int projectGroups(SelectStatement* select, const CatalogNode* table,
 }
 
 /* Kept rows, by hash, for DISTINCT. Holds position + 1, so zero means empty. */
-static int* distinctBuckets;
-static int  distinctCount;
+static THREAD_LOCAL int* distinctBuckets;
+static THREAD_LOCAL int  distinctCount;
 
 /* qsort takes no context pointer, so the sort keys live here. Single-threaded. */
-static int sortSlot[MAX_COLS];
-static int sortDescending[MAX_COLS];
-static int sortTerms;
+static THREAD_LOCAL int sortSlot[MAX_COLS];
+static THREAD_LOCAL int sortDescending[MAX_COLS];
+static THREAD_LOCAL int sortTerms;
 
 /*
  * Sorting works on a small array beside the rows rather than on the rows.
@@ -1936,9 +1936,9 @@ typedef struct {
     int   index;
 } SortKey;
 
-static const Row* sortRows;
-static SortKey*   sortKeys;
-static int        sortCapacity;
+static THREAD_LOCAL const Row* sortRows;
+static THREAD_LOCAL SortKey*   sortKeys;
+static THREAD_LOCAL int        sortCapacity;
 
 static int reserveOrder(int rows)
 {
@@ -2295,7 +2295,7 @@ static void applyLimit(const SelectStatement* select, ResultSet* out)
  * still the full cross product. An index nested loop on the join column is the
  * upgrade when that starts to show.
  */
-static Heap joinHeap;
+static THREAD_LOCAL Heap joinHeap;
 
 static int joinTables(const SelectStatement* select, const Condition* where,
                       int t, int base, Row* work)
@@ -2624,7 +2624,7 @@ static int hashJoin(const SelectStatement* select, const CatalogNode* schema,
 
 static int buildJoin(SelectStatement* select, const CatalogNode* schema)
 {
-    static Row work;                    /* the recursion fills one shared row */
+    static THREAD_LOCAL Row work;       /* the recursion fills one row per thread */
 
     /* The schema is built after parsing, so this is the first time the WHERE
        has seen the columns it will actually be run against. */

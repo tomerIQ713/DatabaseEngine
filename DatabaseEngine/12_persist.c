@@ -1142,6 +1142,30 @@ int rollbackTransaction(void)
 
 
 /*
+ * Ends a transaction whose session has gone, by whatever means are to hand.
+ *
+ * A file-backed database goes back to the file, which is an ordinary rollback.
+ * :memory: has no file to go back to and refuses one - but the transaction
+ * still must not be left open, because it does not belong to the engine, it
+ * belonged to a connection that no longer exists. Left open, the next
+ * connection inherits it: it reports itself in a transaction it never began,
+ * its writes are never committed because the engine thinks one is in
+ * progress, and it latches the write lock against every other session.
+ *
+ * So the work of an abandoned :memory: transaction stays visible. That is the
+ * lesser of the two, and it is the same bargain :memory: makes everywhere
+ * else: no file, no going back.
+ */
+void abandonTransaction(void)
+{
+    if (!transactionOpen)
+        return;
+
+    if (rollbackTransaction() != SUCCESS_CODE)
+        transactionOpen = ZERO;
+}
+
+/*
  * Puts the catalog into its pages and commits everything the statement touched.
  *
  * The catalog has to go first. It records which pages belong to which table, so

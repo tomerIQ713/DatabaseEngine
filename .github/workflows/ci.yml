@@ -13,7 +13,7 @@ jobs:
 
       - name: Build
         working-directory: DatabaseEngine
-        run: cc -std=c17 -O2 -Wall -Wextra -Wpedantic -o db *.c
+        run: cc -std=c17 -O2 -Wall -Wextra -Wpedantic -o db *.c -lpthread
 
       - name: Golden files
         working-directory: DatabaseEngine
@@ -38,7 +38,7 @@ jobs:
       # under one. Every suite runs again, and the fuzzer with it.
       - name: Build instrumented
         working-directory: DatabaseEngine
-        run: cc -std=c17 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -o db-asan *.c
+        run: cc -std=c17 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -o db-asan *.c -lpthread
 
       - name: Golden files
         working-directory: DatabaseEngine
@@ -60,6 +60,34 @@ jobs:
         working-directory: DatabaseEngine
         run: python3 tests/fuzz.py wire --exe ./db-asan --runs 100 --seed 1
 
+  races:
+    name: Linux (ThreadSanitizer)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The engine serves a thread per connection, and the toolchain it was
+      # written on has no working sanitizer of any kind - so this job is the
+      # only place a data race is actually looked for rather than reasoned
+      # about. The concurrency checks in wire.py are what drive it: several
+      # connections reading at once, a transaction blocking them, and USE
+      # moving one session and not the others.
+      - name: Build instrumented
+        working-directory: DatabaseEngine
+        run: cc -std=c17 -O1 -g -fsanitize=thread -fno-omit-frame-pointer -o db-tsan *.c -lpthread
+
+      - name: Protocol and concurrency
+        working-directory: DatabaseEngine
+        env:
+          TSAN_OPTIONS: halt_on_error=1 second_deadlock_stack=1
+        run: ./tests/wire.sh ./db-tsan
+
+      - name: Readers in parallel
+        working-directory: DatabaseEngine
+        env:
+          TSAN_OPTIONS: halt_on_error=1
+        run: ./tests/parallel.sh ./db-tsan
+
   macos:
     name: macOS (clang)
     runs-on: macos-latest
@@ -68,7 +96,7 @@ jobs:
 
       - name: Build
         working-directory: DatabaseEngine
-        run: cc -std=c17 -O2 -Wall -Wextra -o db *.c
+        run: cc -std=c17 -O2 -Wall -Wextra -o db *.c -lpthread
 
       - name: Golden files
         working-directory: DatabaseEngine

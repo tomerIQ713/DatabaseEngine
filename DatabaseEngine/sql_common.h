@@ -18,6 +18,29 @@
 #define _strnicmp strncasecmp
 #endif
 
+/*
+ * Per-thread state.
+ *
+ * A connection gets a thread, and everything a *statement* works in is private
+ * to it: the text arena a scan winds back, the executor's candidate array,
+ * group table, join heap and sort buffers, the subquery pool, and which
+ * database USE left this connection on. Marking them thread-local rather than
+ * threading a context through every function is what keeps this a small change
+ * to a large executor - each one is already written as scratch space for one
+ * statement, and that is exactly what a thread now has its own of.
+ *
+ * What is deliberately *not* thread-local is the data: the catalog, the heaps,
+ * the indexes, the buffer pool and the log are one copy, shared, and reached
+ * only under the engine lock.
+ */
+#if defined(_MSC_VER)
+#define THREAD_LOCAL __declspec(thread)
+#elif defined(__GNUC__)
+#define THREAD_LOCAL __thread
+#else
+#define THREAD_LOCAL _Thread_local
+#endif
+
 #define MAX_TOKENS      100
 #define MAX_COLS        16
 /* Rows are no longer capped: heaps page and result sets grow. This is only
@@ -132,6 +155,7 @@
 #define ERROR_IO_VERSION                    602
 #define ERROR_IO_WRITE                      603
 #define ERROR_IO_CHECKSUM                   604
+#define ERROR_IO_TIMED_OUT                  605
 
 #define GENERAL_ERROR                       501
 
@@ -747,6 +771,41 @@ int  walSyncHandle(FILE* file);
 void walDiscard(const char* dbPath);
 int  isPageFile(const char* path);
 
+/* ---------- 18 threads ---------- */
+
+/* What a lock is made of differs per platform, so 18_thread.c keeps both the
+   types and the two locks to itself. Everything else asks for the engine lock
+   by name and never holds one of its own. */
+typedef void* (*ThreadFunction)(void*);
+
+int  threadStart(ThreadFunction function, void* argument);
+
+void initThreads(void);
+void freeThreads(void);
+
+/* Held for one statement: shared by anything that only reads, exclusive by
+   anything that writes. No-ops until a server starts one, so a plain REPL
+   session pays nothing for them. */
+void engineReadLock(void);
+void engineWriteLock(void);
+void engineReadUnlock(void);
+void engineWriteUnlock(void);
+
+/* Taken underneath the engine lock, never the other way round - which is the
+   whole of the lock ordering rule, because there are only these two. */
+/* This session's own answer to "am I in a transaction", which is not the
+   engine's: only one connection can be, and it is the one holding the lock. */
+int  engineInTransaction(void);
+void engineReleaseTransaction(void);
+
+/* Room for one more connection, or not. The count is the server's, not the
+   engine's, so it has a lock of its own and never waits behind a statement. */
+int  sessionAcquire(int limit);
+void sessionRelease(void);
+
+void poolEnter(void);
+void poolLeave(void);
+
 /* ---------- 11 index ---------- */
 void   initIndexes(void);
 Index* findIndexByName(const char* name);
@@ -819,6 +878,7 @@ void markSchemaChanged(void);
 int  beginTransaction(void);
 int  commitTransaction(void);
 int  rollbackTransaction(void);
+void abandonTransaction(void);
 int  inTransaction(void);
 int  closeDatabase(void);
 int loadDatabase(const char* path);

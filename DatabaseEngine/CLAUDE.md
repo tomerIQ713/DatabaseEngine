@@ -861,34 +861,94 @@ nothing was declared - pg8000 declares nothing - the candidates are tried in
 turn until the statement parses. A probe therefore costs a scan, and a
 parameterised query is run twice.
 
-**Many connections, one statement at a time.** Everything a connection owns -
-socket, output buffer, prepared statements, portal, and the database USE left
-it on - lives in a `Session`, and `self` is whichever one is being served.
-What is deliberately *not* per-session is the engine: one catalog, one buffer
-pool, one log. So `serveWire` is a `select` loop that accepts up to
-`MAX_SESSIONS` clients and runs their statements one after another.
+**Many connections, and reads run at the same time.** A connection gets a
+thread, and `self` in `16_wire.c` is that thread's own `Session` - so
+everything a connection owns is reached without a lock, because no other
+thread can see it. The engine underneath is shared, and one reader-writer lock
+is what makes that safe:
 
-That shape is the point. Statements never overlap, so there is no shared state
-to race on and no lock to get wrong; the ceiling is throughput, not
-correctness. Read concurrency is the upgrade when that ceiling is what hurts,
-and it needs the pool and the catalog made re-entrant first.
+- **A SELECT takes the engine lock shared**, so any number run together.
+- **Everything else takes it exclusive** and runs alone.
+- **A transaction keeps the exclusive lock between statements**, which is what
+  a transaction *is* here: `holdingForTransaction` in `10_controller.c` is
+  thread-local, set when a statement leaves a transaction open and cleared
+  when one closes it. Readers behind it wait.
 
-Four things hold it together, and `tests/wire.py` pins each:
+`readsOnly` is asked of the parsed statement, never of the text - "select" is
+not the only word a statement can start with. Tokenising and parsing happen
+*before* the lock is taken, because the token list, the statement and the
+subquery pool are all this thread's own.
 
-- **A session may need to keep the engine across several messages.** A
-  transaction spans statements, and a suspended portal holds rows that live in
-  the statement arena - which the next statement winds back. `stillHolding`
-  asks both questions, and while one session holds, the others are simply not
-  read from: their messages wait in the socket. They are not refused, which is
-  what makes a connection pool work rather than fail.
-- **A holder that goes quiet is let go of** after `HOLD_TIMEOUT_SECONDS`, and
-  its transaction is rolled back - a client that stopped talking never
-  committed it. Without that, one abandoned BEGIN wedges the server forever.
-- **`USE` belongs to the session that ran it.** `currentDatabaseId` is read
-  back after every message and restored before the next, so two connections
-  sit in different databases without either seeing the other move.
-- **A session starts clean** because it is `calloc`ed: no prepared statements,
-  no portal, nothing to skip to Sync.
+**The thing that made this possible is that scratch state was already
+per-statement.** The executor's candidate array, group table, join heap, sort
+buffers and subquery results, the text arena a scan winds back, the parser's
+subquery pool, and which database `USE` left this connection on: all of them
+are written as scratch space for one statement, so marking them
+`THREAD_LOCAL` (see `sql_common.h`) gave each thread its own without threading
+a context through a 2,900-line executor. What is deliberately *not*
+thread-local is the data - catalog, heaps, indexes, pool, log - which is one
+copy behind the lock.
+
+**A reader mutates the buffer pool, and does more of it than it looks.**
+"Read-only" is only ever a claim about the *data*. A SELECT moves the CLOCK
+hand, changes pin counts, and faults pages in, evicting others to do it - and
+a SELECT with a join goes further, because the join builds its combined rows
+in a synthetic heap whose pages come from this same pool. So a query that
+changes no table still allocates, writes and frees pool pages.
+
+That is why exactly four entry points take the pool's own mutex - `poolPin`,
+`poolUnpin`, `poolAllocate`, `poolFree` - as thin wrappers around the real
+bodies (`pinLocked`, `unpinLocked`, `allocateLocked`, `freeLocked`), with the
+internal callers using the unlocked ones. Everything else in `14_pool.c` is
+reachable only from a writer, which already holds the engine lock exclusively.
+
+**Before adding a pool call to the executor, the storage layer or the index,
+check which of those two groups it lands in.** Locking pin and unpin and
+stopping there is the obvious mistake, and it was made here first: a join
+allocating pages was reaching an unlocked `poolAllocate` from two threads at
+once. The audit is one grep - which `pool*` names appear in `06_executor.c`,
+`07_storage.c`, `11_index.c` and `02_catalog.c` - and today it answers with
+exactly those four.
+
+**A reader never commits**, for the same reason. `ProcessStatement` skips
+`commitDatabase` for a shared-lock statement: it has nothing of its own to
+make durable, and committing writes the catalog and appends to the log, which
+several readers running at once must not do. The pages a SELECT leaves dirty
+belong to a join's scratch heap, and the next writer carries them out with its
+own commit.
+
+The `Page*` a reader is handed outlives the mutex on purpose: its frame cannot
+be evicted while the caller holds the pin, and nothing writes to a page while
+readers are running, because a writer holds the engine lock exclusively.
+
+**Two locks, and they nest one way only.** A statement takes the engine lock;
+the pool takes its mutex underneath. Nothing ever goes the other way, which is
+the whole of the ordering rule. The pool's mutex is recursive so that a pool
+function calling another cannot deadlock against itself.
+
+**Everything a thread allocated, that thread frees.** `closeSession` calls
+`freeExecutor` and `resetTextArena` before the thread ends - those buffers are
+thread-local, so nothing else will ever see them again.
+
+**An idle transaction is dropped, not waited on.** A client that opens a
+transaction and stops talking holds the write lock against every other
+connection, so while one is open the socket carries a receive timeout
+(`IDLE_IN_TRANSACTION_SECONDS`). The thread wakes on its own, rolls back, and
+releases. `readExactly` reports that as `ERROR_IO_TIMED_OUT` and
+`serveMessage` passes it through rather than flattening it into "the client
+went away" - the two look identical to the socket and mean different things.
+
+**Locks are no-ops until a server starts one.** `initThreads` is called by
+`serveWire` and nowhere else, so a plain REPL session pays nothing.
+
+**Races are only actually looked for in CI.** This MinGW has no working
+sanitizer of any kind, so the ThreadSanitizer job in
+`.github/workflows/ci.yml` is the only place a data race is caught rather than
+reasoned about. `tests/parallel.sh` is what drives it, and it is also the
+proof that reads overlap at all - it times N slow SELECTs run one after
+another against the same N run at once, and fails if the second is not
+meaningfully faster. Measured on a Windows laptop: 4 readers, 1.88s serial
+against 0.78s together.
 
 A seventeenth connection is closed rather than queued, so a client sees a
 refusal instead of a silence it has to time out.

@@ -173,7 +173,7 @@ void exprLabel(const ExprPool* pool, int node, char* out, size_t size)
  * that does is the subquery check, which can see whether the name would have
  * resolved in the query outside and report a correlated subquery instead.
  */
-static char unresolved[NAME_LEN];
+static THREAD_LOCAL char unresolved[NAME_LEN];
 
 const char* exprUnresolvedColumn(void)
 {

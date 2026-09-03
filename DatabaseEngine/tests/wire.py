@@ -331,24 +331,30 @@ query(many[0], "use main")
 
 # A transaction holds the engine: another session's statement waits for the
 # COMMIT rather than running inside the transaction or being refused.
-timeline = []
+#
+# What is asserted is that the reader *waited* and that it saw the committed
+# row. Not the order the two clients hear back in: the lock is released when
+# ProcessStatement returns, which is before the committing client's own
+# acknowledgement has been written to its socket, so the reader's answer can
+# legitimately arrive first. Asserting that interleaving failed about half the
+# time and was testing the wrong thing.
+HELD = 1.5
+waited = {}
 
 
 def holder():
     query(many[0], "begin")
     query(many[0], "insert into conc values (900, 'tx')")
-    timeline.append("inserted")
-    time.sleep(1.5)
+    time.sleep(HELD)
     query(many[0], "commit")
-    timeline.append("committed")
 
 
 def waiter():
     time.sleep(0.4)                       # once the transaction is under way
-    timeline.append("asked")
+    start = time.time()
     rows = [m for m in query(many[2], "select count(*) from conc") if m[0] == "D"]
-    timeline.append("answered")
-    waiter.rows = rows
+    waited["seconds"] = time.time() - start
+    waited["rows"] = rows
 
 
 first = threading.Thread(target=holder)
@@ -356,11 +362,13 @@ second = threading.Thread(target=waiter)
 first.start(); second.start()
 first.join(); second.join()
 
-check("a waiting session is answered only after the commit",
-      ["inserted", "asked", "committed", "answered"], timeline)
+# The holder sleeps HELD seconds with the transaction open and the reader asks
+# 0.4s in, so a reader that was actually blocked waits about HELD - 0.4. Half
+# of that is a wide enough margin to be about blocking rather than about timing.
+check("a reader waits for an open transaction rather than running inside it",
+      True, waited["seconds"] > (HELD - 0.4) / 2)
 
-check("and then sees the committed row", [("D", ["5"])], waiter.rows)
-
+check("and then sees the committed row", [("D", ["5"])], waited["rows"])
 for one in many:
     one.sendall(b"X" + struct.pack("!I", 4))
     one.close()

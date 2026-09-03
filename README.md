@@ -133,10 +133,18 @@ containing NULL)` correctly returns nothing, `count(col)` over an outer join's
 unmatched row correctly counts zero, and `ON` and `WHERE` on an outer join mean
 different things.
 
+**Concurrency.** A thread per connection, up to 16, with one reader-writer lock
+over the engine: `SELECT`s take it shared and genuinely run at the same time,
+anything that writes takes it exclusive. Measured at **2.4x on 4 readers**.
+Everything a statement scratches in — the text arena, the join heap, the
+group table, the sort buffers — is thread-local, which is what made a
+2,900-line executor safe to run concurrently without threading a context
+through it. A transaction holds the write lock between statements, and is
+rolled back if the client goes quiet while holding it.
+
 **Wire protocol.** PostgreSQL v3, both the simple and the extended query
-protocol, with up to 16 concurrent connections. Each has its own prepared
-statements, portal and current database; statements are serialised, and a
-transaction blocks the others until it commits.
+protocol. Each connection has its own prepared statements, portal and current
+database.
 
 ## Measured
 
@@ -168,12 +176,12 @@ are in the design notes below.
 
 Worth knowing before you reach for it:
 
-- **One statement at a time.** Up to 16 connections can be open at once - a
-  connection pool works - but their statements are run one after another, not
-  in parallel. The engine underneath is one catalog, one buffer pool and one
-  log, so the ceiling is throughput rather than correctness. A transaction
-  holds the engine until it commits; other sessions wait rather than being
-  refused.
+- **Writes are serialised.** Reads run in parallel, but one reader-writer lock
+  covers the whole engine, so a write excludes everything and a transaction
+  holds the lock until it commits. A read-heavy load scales; a write-heavy one
+  does not. Finer-grained locking in the pool and the catalog is the upgrade,
+  and it is a great deal of work for a workload nobody has yet.
+- **Sixteen connections.** The seventeenth is refused rather than queued.
 - **No correlated subqueries.** An uncorrelated one is run once before the
   outer query starts; a correlated one would have to be re-run per row, inside
   a scan already using the executor's shared state. It is refused with an
@@ -193,12 +201,19 @@ Worth knowing before you reach for it:
 ./tests/run.sh ./db          # 33 golden-file tests
 ./tests/recovery.sh ./db     # 20 crash-recovery tests (kills the process mid-session)
 ./tests/wire.sh ./db         # 49 protocol and concurrency tests (needs python3)
+./tests/parallel.sh ./db     # checks that readers actually overlap
 ./tests/bench.sh ./db        # the table above
 ```
 
 Crash recovery and the wire protocol can't be checked with golden files — one
 needs the process killed, the other is a conversation over a socket — so they
-have their own scripts.
+have their own scripts. `parallel.sh` is a timing measurement rather than an
+assertion: it fails if concurrent readers are no faster than sequential ones.
+
+CI additionally builds under AddressSanitizer and UndefinedBehaviourSanitizer,
+and runs the concurrency tests under ThreadSanitizer — which is the only
+place data races are actually caught, since the Windows toolchain this was
+written on has no working sanitizer of any kind.
 
 There is also a fuzzer, which mutates SQL and protocol messages and shrinks any
 crash to the fewest statements that still cause it:

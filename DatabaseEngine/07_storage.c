@@ -1019,7 +1019,7 @@ void arenaRelease(Arena* arena)
  * One arena per statement. A scan that reads and discards rows can wind it back
  * with textMark/textReset rather than letting every row it rejected pile up.
  */
-static Arena statementArena;
+static THREAD_LOCAL Arena statementArena;
 
 const char* internText(const char* text, int length)
 {

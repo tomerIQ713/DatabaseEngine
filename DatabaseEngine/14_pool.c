@@ -316,15 +316,26 @@ static int poolWriteHeader(void)
  */
 long poolCorruptCount(void)
 {
-    return corrupt;
+    poolEnter();
+
+    long seen = corrupt;
+
+    poolLeave();
+    return seen;
 }
 
 int poolHasDirty(void)
 {
-    for (int i = ZERO; i < frameCount; i++)
+    poolEnter();
+
+    int found = ZERO;
+
+    for (int i = ZERO; i < frameCount && !found; i++)
         if (frames[i]->pageId >= ZERO && frames[i]->dirty)
-            return ONE;
-    return ZERO;
+            found = ONE;
+
+    poolLeave();
+    return found;
 }
 
 /*
@@ -361,7 +372,12 @@ int poolIsWritable(void)
 
 int poolPageCount(void)
 {
-    return pageCount;
+    poolEnter();
+
+    int count = pageCount;
+
+    poolLeave();
+    return count;
 }
 
 /*
@@ -474,7 +490,7 @@ static int acquireFrame(void)
  * pointer into a page must be inside a pin, because eviction can otherwise
  * reuse the frame underneath it.
  */
-Page* poolPin(int pageId)
+static Page* pinLocked(int pageId)
 {
     if (pageId < ZERO || pageId >= pageCount)
         return NULL;
@@ -570,7 +586,7 @@ void poolReport(void)
            checksums ? "on" : "off (older file)", corrupt);
 }
 
-void poolUnpin(int pageId, int dirty)
+static void unpinLocked(int pageId, int dirty)
 {
     int frame = findFrame(pageId);
 
@@ -591,7 +607,36 @@ void poolUnpin(int pageId, int dirty)
  * A fresh zeroed page, reusing a freed id where there is one. The page starts
  * dirty because nothing in the file corresponds to it yet.
  */
-int poolAllocate(int* pageId)
+/*
+ * The two the readers share.
+ *
+ * A reader mutates the pool as much as a writer does - it moves the CLOCK
+ * hand, changes pin counts, and faults pages in, evicting others to do it - so
+ * "read-only" statements are only read-only about the *data*. These are the
+ * places two of them meet, and the pool's mutex is what makes that safe.
+ *
+ * The Page* outlives the lock on purpose. Its frame cannot be evicted while
+ * the caller holds the pin, and nothing writes to a page while readers are
+ * running, because a writer holds the engine lock exclusively.
+ */
+Page* poolPin(int pageId)
+{
+    poolEnter();
+
+    Page* page = pinLocked(pageId);
+
+    poolLeave();
+    return page;
+}
+
+void poolUnpin(int pageId, int dirty)
+{
+    poolEnter();
+    unpinLocked(pageId, dirty);
+    poolLeave();
+}
+
+static int allocateLocked(int* pageId)
 {
     int frame = acquireFrame();
     if (frame < ZERO)
@@ -618,7 +663,7 @@ int poolAllocate(int* pageId)
  * Returns a page to the free list. The file keeps its slot - holes are cheaper
  * than renumbering every position that points past them.
  */
-void poolFree(int pageId)
+static void freeLocked(int pageId)
 {
     int frame = findFrame(pageId);
 
@@ -650,12 +695,36 @@ void poolFree(int pageId)
  * so saving a database far larger than the pool costs one frame at a time.
  * Freed pages are written as zeroes to keep page ids lined up with offsets.
  */
+/*
+ * Also reachable from a reader, and for a reason that is easy to miss: a join
+ * builds its combined rows in a synthetic heap, and that heap's pages come
+ * from this pool. So a SELECT allocates, writes and frees pool pages even
+ * though it changes no table - which is why these two need the mutex as much
+ * as pin and unpin do.
+ */
+int poolAllocate(int* pageId)
+{
+    poolEnter();
+
+    int errorCode = allocateLocked(pageId);
+
+    poolLeave();
+    return errorCode;
+}
+
+void poolFree(int pageId)
+{
+    poolEnter();
+    freeLocked(pageId);
+    poolLeave();
+}
+
 int poolWriteAll(FILE* file)
 {
     static unsigned char blank[PAGE_SIZE];
 
     for (int id = ZERO; id < pageCount; id++) {
-        Page* page = poolPin(id);
+        Page* page = pinLocked(id);
 
         if (page == NULL) {
             if (fwrite(blank, ONE, PAGE_SIZE, file) != PAGE_SIZE)
@@ -666,7 +735,7 @@ int poolWriteAll(FILE* file)
         poolStampPage(page);
 
         size_t written = fwrite(page->data, ONE, PAGE_SIZE, file);
-        poolUnpin(id, ZERO);
+        unpinLocked(id, ZERO);
 
         if (written != PAGE_SIZE)
             return ERROR_IO_WRITE;

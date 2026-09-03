@@ -37,6 +37,7 @@
     <ClCompile Include="15_wal.c" />
     <ClCompile Include="16_wire.c" />
     <ClCompile Include="17_expr.c" />
+    <ClCompile Include="18_thread.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sql_common.h" />

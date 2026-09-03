@@ -15,7 +15,7 @@
  */
 static char names[MAX_DATABASES][NAME_LEN];
 static int  used[MAX_DATABASES];
-static int  current;
+static THREAD_LOCAL int  current;
 
 /*
  * Slot 0 is the default database. It always exists, which is what lets USE
@@ -28,6 +28,10 @@ void initDatabases(void)
 
     snprintf(names[ZERO], NAME_LEN, "%s", DEFAULT_DB_NAME);
     used[ZERO] = ONE;
+
+    /* Thread-local, and zero-initialised - so a connection thread starts
+       in the default database without being told, which is where a new
+       session should begin. */
     current    = ZERO;
 }
 

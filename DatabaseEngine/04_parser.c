@@ -25,9 +25,9 @@ static int parseSelect(const TokenList* tokens, SelectStatement* out);
  * for exactly as long as the statement that parsed it - the same lifetime the
  * statement arena gives to text.
  */
-static SelectStatement subqueryPool[MAX_SUBQUERIES];
-static int             subqueryScalar[MAX_SUBQUERIES];
-static int             subqueryCount;
+static THREAD_LOCAL SelectStatement subqueryPool[MAX_SUBQUERIES];
+static THREAD_LOCAL int             subqueryScalar[MAX_SUBQUERIES];
+static THREAD_LOCAL int             subqueryCount;
 
 void resetSubqueries(void)
 {

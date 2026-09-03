@@ -29,6 +29,7 @@ typedef int WSADATA;
 #include "sql_common.h"
 #include <ctype.h>
 #include <time.h>
+#include <errno.h>
 
 /*
  * The PostgreSQL frontend/backend protocol, version 3, simple-query subset -
@@ -97,29 +98,32 @@ typedef struct {
 /*
  * Concurrent connections.
  *
- * Everything a connection owns lives in a Session, and `self` is whichever one
- * is being served right now. What is deliberately *not* per-session is the
- * engine underneath: one catalog, one buffer pool, one write-ahead log. So the
- * server accepts many clients and runs their statements one at a time.
+ * A connection gets a thread, and `self` is that thread's own Session - so
+ * everything a connection owns is reached without a lock, because no other
+ * thread can see it.
  *
- * ponytail: a single-threaded select loop rather than a thread per connection.
- * The ceiling is throughput, not correctness - statements do not overlap, so
- * there is no shared state to race on and no lock to get wrong. Read
- * concurrency is the upgrade when that ceiling is the thing that hurts, and it
- * needs the pool and the catalog made re-entrant first.
+ * The engine underneath is shared, and the engine lock is what makes that
+ * safe: a SELECT takes it shared and any number run together, anything that
+ * writes takes it exclusive and runs alone. That is the whole model. It is
+ * coarse on purpose - one lock, held for one statement - and it is what "read
+ * concurrency" means here.
+ *
+ * ponytail: a reader-writer lock over the whole engine rather than per-page
+ * latches. Writers serialise against everything, so a write-heavy load is no
+ * faster than it was; the upgrade is finer-grained locking in the pool and the
+ * catalog, and it is a great deal of work for a workload nobody has yet.
  */
 #define MAX_SESSIONS 16
 
-/* A session may need to keep the engine across several messages - a
-   transaction spans statements, and a suspended portal holds rows that live in
-   the statement arena, which the next statement winds back. Long enough that a
-   real transaction is never cut short; short enough that a client which
-   vanishes mid-transaction cannot hold the engine forever. */
-#define HOLD_TIMEOUT_SECONDS 30
+/* A transaction holds the engine's write lock across statements, so a client
+   that opens one and then stops talking would block every writer behind it.
+   While a transaction is open the socket is given this timeout: the thread
+   wakes on its own, rolls back, and lets go. Long enough that a real
+   transaction is never cut short. */
+#define IDLE_IN_TRANSACTION_SECONDS 30
 
 typedef struct Session {
     SOCKET        socket;
-    int           handshakeDone;
     unsigned char out[WIRE_BUFFER];
     size_t        outUsed;
     Prepared      prepared[MAX_PREPARED];
@@ -128,17 +132,14 @@ typedef struct Session {
        protocol says and what clients expect: they send a whole batch and then
        look. */
     int           ignoringUntilSync;
-    int           databaseId;               /* where USE left this session */
-    time_t        lastActive;
 } Session;
 
-static Session* sessions[MAX_SESSIONS];
-static Session* self;                       /* the one being served right now */
+/* This thread's session. Nothing else can reach it, which is why none of the
+   code below takes a lock to touch it. */
+static THREAD_LOCAL Session* self;
 
-/* The session that is mid-transaction or holding undelivered rows, or -1.
-   While one holds, the others are simply not read from: their messages wait in
-   the socket until it lets go. */
-static int holder = -ONE;
+/* The count of live connections lives with the lock that guards it, in
+   18_thread.c - see sessionAcquire. */
 
 /* ---------- bytes on the wire ---------- */
 
@@ -214,6 +215,21 @@ static unsigned int readU32(const unsigned char* at)
 }
 
 /*
+ * Whether the last recv gave up on time rather than on the connection. Only a
+ * socket carrying an open transaction has a deadline at all, so this is the
+ * difference between "the client is thinking" and "the client is holding the
+ * write lock and has stopped talking".
+ */
+static int receiveTimedOut(void)
+{
+#ifdef _WIN32
+    return WSAGetLastError() == WSAETIMEDOUT;
+#else
+    return errno == EAGAIN || errno == EWOULDBLOCK;
+#endif
+}
+
+/*
  * Reads exactly this many bytes, or reports that the client went away. recv
  * returns what has arrived rather than what was asked for, so a message that
  * spans two packets has to be assembled here.
@@ -226,7 +242,7 @@ static int readExactly(unsigned char* into, size_t length)
         int got = recv(self->socket, (char*)into + at, (int)(length - at), ZERO);
 
         if (got <= ZERO)
-            return ERROR_IO_CANNOT_OPEN;
+            return receiveTimedOut() ? ERROR_IO_TIMED_OUT : ERROR_IO_CANNOT_OPEN;
         at += (size_t)got;
     }
 
@@ -1289,8 +1305,14 @@ static int serveMessage(ResultSet* results)
 {
     unsigned char header[5];
 
-    if (readExactly(header, 5) != SUCCESS_CODE)
-        return ERROR_IO_CANNOT_OPEN;
+    /* Passed through rather than flattened: a receive timeout means this
+       connection is idle in a transaction and holding the write lock,
+       which the caller reports and acts on differently from a client that
+       simply went away. */
+    int errorCode = readExactly(header, 5);
+
+    if (errorCode != SUCCESS_CODE)
+        return errorCode;
 
     char         type   = (char)header[ZERO];
     unsigned int length = readU32(header + ONE);
@@ -1316,7 +1338,7 @@ static int serveMessage(ResultSet* results)
     if (self->ignoringUntilSync && type != 'S')
         return SUCCESS_CODE;
 
-    int errorCode = SUCCESS_CODE;
+    errorCode = SUCCESS_CODE;
 
     switch (type) {
     case 'Q':
@@ -1359,61 +1381,104 @@ static int serveMessage(ResultSet* results)
 }
 
 /*
- * Listens until killed, serving many clients - one statement at a time.
+ * Listens until killed, one thread per client.
  */
-
-/* A session lets go of the engine when it is neither in a transaction nor
-   holding rows a client has not collected yet. Both are reasons the next
-   statement must not run: a transaction spans statements, and a suspended
-   portal's rows live in the statement arena that the next statement winds
-   back. */
-static int stillHolding(const Session* session)
+static void closeSession(void)
 {
-    return inTransaction()
-        || (session->portal.used && session->portal.executed
-            && session->portal.sent < session->portal.result.nrows);
-}
-
-static void closeSession(int index)
-{
-    Session* session = sessions[index];
-
-    if (session == NULL)
-        return;
-
-    if (holder == index) {
-        /* A session that ends mid-transaction has not committed it, and the
-           next one must not inherit it. */
-        if (inTransaction())
-            rollbackTransaction();
-        holder = -ONE;
+    /* A session that ends mid-transaction has not committed it, and no other
+       connection may inherit it - not the rows, and not the status byte that
+       would tell the next client it is inside one. abandonTransaction ends it
+       whether or not the database can roll back. This happens under the write
+       lock this thread is still holding, and only then is the lock given
+       back. */
+    if (engineInTransaction()) {
+        abandonTransaction();
+        engineReleaseTransaction();
     }
 
-    closesocket(session->socket);
-    freeResultSet(&session->portal.result);
-    free(session);
-    sessions[index] = NULL;
+    closesocket(self->socket);
+    freeResultSet(&self->portal.result);
+    free(self);
+    self = NULL;
+
+    /* Everything the executor and the arena allocated for this thread is this
+       thread's own, so it has to be released here rather than at exit -
+       nothing else will ever see it again. resetTextArena releases the chunks
+       as well as winding back, which is all this needs. */
+    freeExecutor();
+    resetTextArena();
+
+    sessionRelease();
 
     printf("client disconnected\n");
     fflush(stdout);
 }
 
-/* Makes the session current: its socket, its buffers, and the database USE
-   left it on. Everything below this call reads `self`. */
-static void selectSession(int index)
+/*
+ * A transaction holds the engine's write lock between statements, so a client
+ * that opens one and then goes quiet would block every writer behind it. The
+ * socket gets a receive timeout for exactly as long as that is true.
+ */
+static void setIdleTimeout(int seconds)
 {
-    self = sessions[index];
-    setCurrentDatabaseId(self->databaseId);
+#ifdef _WIN32
+    DWORD milliseconds = (DWORD)(seconds * 1000);
+    setsockopt(self->socket, SOL_SOCKET, SO_RCVTIMEO,
+               (const char*)&milliseconds, sizeof milliseconds);
+#else
+    struct timeval wait;
+
+    wait.tv_sec  = seconds;
+    wait.tv_usec = ZERO;
+    setsockopt(self->socket, SOL_SOCKET, SO_RCVTIMEO,
+               (const char*)&wait, sizeof wait);
+#endif
+}
+
+static void* serveClient(void* raw)
+{
+    ResultSet results = { ZERO };
+
+    self = (Session*)raw;
+
+    printf("client connected\n");
+    fflush(stdout);
+
+    if (handshake() == SUCCESS_CODE)
+        for (;;) {
+            /* Only while a transaction is open: an idle connection that holds
+               nothing is welcome to stay idle forever. */
+            setIdleTimeout(engineInTransaction() ? IDLE_IN_TRANSACTION_SECONDS
+                                                 : ZERO);
+
+            int errorCode = serveMessage(&results);
+
+            if (errorCode == ERROR_IO_TIMED_OUT) {
+                printf("session idle in transaction, rolled back\n");
+                fflush(stdout);
+                break;
+            }
+
+            if (errorCode != SUCCESS_CODE)
+                break;
+        }
+
+    freeResultSet(&results);
+    closeSession();
+    return NULL;
 }
 
 int serveWire(int port)
 {
     WSADATA         winsock;
     struct sockaddr_in address;
-    ResultSet       results = { ZERO };
 
     if (WSAStartup(MAKEWORD(2, 2), &winsock) != ZERO)
         return ERROR_IO_CANNOT_OPEN;
+
+    /* From here on there is more than one thread, and the locks stop being
+       no-ops. Nothing before this point needed them. */
+    initThreads();
 
     SOCKET listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -1442,133 +1507,36 @@ int serveWire(int port)
     fflush(stdout);
 
     for (;;) {
-        fd_set  readable;
-        SOCKET  highest = listener;
-        struct timeval wait;
+        SOCKET incoming = accept(listener, NULL, NULL);
 
-        FD_ZERO(&readable);
-        FD_SET(listener, &readable);
-
-        /* While one session holds the engine, only it is read from. The others
-           are not refused - their messages simply sit in the socket until it
-           lets go, which is what makes a connection pool work rather than
-           fail. */
-        for (int i = ZERO; i < MAX_SESSIONS; i++) {
-            if (sessions[i] == NULL)
-                continue;
-            if (holder >= ZERO && holder != i)
-                continue;
-
-            FD_SET(sessions[i]->socket, &readable);
-
-            if (sessions[i]->socket > highest)
-                highest = sessions[i]->socket;
-        }
-
-        wait.tv_sec  = ONE;
-        wait.tv_usec = ZERO;
-
-        int ready = select((int)highest + ONE, &readable, NULL, NULL, &wait);
-
-        if (ready < ZERO)
+        if (incoming == INVALID_SOCKET)
             break;
 
-        /* A holder that has gone quiet is let go of, or nothing else would
-           ever run again. Its transaction is rolled back, because a client
-           that stopped talking never committed it. */
-        if (ready == ZERO && holder >= ZERO && sessions[holder] != NULL
-            && time(NULL) - sessions[holder]->lastActive >= HOLD_TIMEOUT_SECONDS) {
+        /* calloc, so the session starts with no prepared statements, no
+           portal, and nothing to skip to Sync - which is exactly what a new
+           connection must look like. */
+        Session* session = sessionAcquire(MAX_SESSIONS)
+                         ? (Session*)calloc(ONE, sizeof(Session)) : NULL;
 
-            printf("session %d idle in transaction, rolled back\n", holder);
-            fflush(stdout);
-
-            selectSession(holder);
-            closeSession(holder);
+        if (session == NULL) {
+            /* Out of slots or out of memory. Closing is the honest answer: the
+               client sees a refused connection rather than a silence it has to
+               time out. */
+            closesocket(incoming);
             continue;
         }
 
-        if (FD_ISSET(listener, &readable)) {
-            SOCKET incoming = accept(listener, NULL, NULL);
+        session->socket = incoming;
 
-            if (incoming != INVALID_SOCKET) {
-                int slot = -ONE;
-
-                for (int i = ZERO; i < MAX_SESSIONS && slot < ZERO; i++)
-                    if (sessions[i] == NULL)
-                        slot = i;
-
-                Session* session = slot >= ZERO
-                                 ? (Session*)calloc(ONE, sizeof(Session)) : NULL;
-
-                if (session == NULL) {
-                    /* Out of slots or out of memory. Closing is the honest
-                       answer: the client sees a refused connection rather than
-                       a silence it has to time out. */
-                    closesocket(incoming);
-                }
-                else {
-                    /* calloc, so the session starts with no prepared
-                       statements, no portal, and nothing to skip to Sync -
-                       which is exactly what a new connection must look like. */
-                    session->socket     = incoming;
-                    session->databaseId = ZERO;
-                    session->lastActive = time(NULL);
-                    sessions[slot]      = session;
-
-                    printf("client connected\n");
-                    fflush(stdout);
-                }
-            }
-        }
-
-        for (int i = ZERO; i < MAX_SESSIONS; i++) {
-            if (sessions[i] == NULL || !FD_ISSET(sessions[i]->socket, &readable))
-                continue;
-
-            /* Asked again here, not just when the set was built: a session
-               served earlier in this same pass may have opened a transaction
-               since, and the rest must not run inside it. */
-            if (holder >= ZERO && holder != i)
-                continue;
-
-            selectSession(i);
-            self->lastActive = time(NULL);
-
-            int errorCode;
-
-            if (!self->handshakeDone) {
-                errorCode = handshake();
-
-                if (errorCode == SUCCESS_CODE)
-                    self->handshakeDone = ONE;
-            }
-            else {
-                errorCode = serveMessage(&results);
-            }
-
-            if (errorCode != SUCCESS_CODE) {
-                closeSession(i);
-                continue;
-            }
-
-            /* Whatever USE did belongs to this session and not to the next. */
-            self->databaseId = currentDatabaseId();
-
-            if (stillHolding(self))
-                holder = i;
-            else if (holder == i)
-                holder = -ONE;
+        if (threadStart(serveClient, session) != SUCCESS_CODE) {
+            closesocket(incoming);
+            free(session);
+            sessionRelease();
         }
     }
 
-    for (int i = ZERO; i < MAX_SESSIONS; i++)
-        if (sessions[i] != NULL) {
-            selectSession(i);
-            closeSession(i);
-        }
-
-    freeResultSet(&results);
     closesocket(listener);
     WSACleanup();
+    freeThreads();
     return SUCCESS_CODE;
 }

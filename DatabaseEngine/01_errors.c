@@ -87,6 +87,7 @@ const char* errorCodeToString(int errorCode)
     case ERROR_IO_VERSION:                  return "database file version not supported";
     case ERROR_IO_WRITE:                    return "failed writing the database file";
     case ERROR_IO_CHECKSUM:                 return "a page failed its checksum: the database file is damaged";
+    case ERROR_IO_TIMED_OUT:                return "the client went quiet";
 
     default:                                return "error";
     }
