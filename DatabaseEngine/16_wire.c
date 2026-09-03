@@ -17,6 +17,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+/* struct timeval, for the receive timeout. winsock2.h supplies its own; on
+   POSIX the socket headers do not declare it. */
+#include <sys/time.h>
 typedef int SOCKET;
 #define INVALID_SOCKET (-1)
 #define closesocket    close

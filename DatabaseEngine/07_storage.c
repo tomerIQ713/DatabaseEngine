@@ -167,7 +167,12 @@ void dateToText(int days, char* out)
     int day;
 
     civilFromDays(days, &year, &month, &day);
-    snprintf(out, 11, "%04d-%02d-%02d", year, month, day);
+
+    /* A date is a day count, and an int day count reaches years no calendar
+       has - so the fields are written at a fixed width rather than trusting
+       the range. The buffer is DATE_TEXT_LEN and the widths add up to it. */
+    snprintf(out, DATE_TEXT_LEN, "%04d-%02d-%02d",
+             year % 10000, month % 100, day % 100);
 }
 
 /*

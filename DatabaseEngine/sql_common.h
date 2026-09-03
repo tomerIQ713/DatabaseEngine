@@ -61,6 +61,9 @@
 #define THREAD_LOCAL _Thread_local
 #endif
 
+/* "YYYY-MM-DD" and its terminator. */
+#define DATE_TEXT_LEN   11
+
 #define MAX_TOKENS      100
 #define MAX_COLS        16
 /* Rows are no longer capped: heaps page and result sets grow. This is only

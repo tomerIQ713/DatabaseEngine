@@ -133,4 +133,4 @@ jobs:
       - name: Golden files
         working-directory: DatabaseEngine
         shell: bash
-        run: ./tests/run.sh ../x64/Debug/DatabaseEngine.exe
+        run: ./tests/run.sh ./x64/Debug/DatabaseEngine.exe

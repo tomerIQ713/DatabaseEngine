@@ -119,7 +119,7 @@ void exprLabel(const ExprPool* pool, int node, char* out, size_t size)
         else if (value->type == TYPE_FLOAT)
             snprintf(out, size, "%g", value->floatValue);
         else if (value->type == TYPE_DATE) {
-            char text[11];
+            char text[DATE_TEXT_LEN];
 
             dateToText(value->intValue, text);
             snprintf(out, size, "'%s'", text);

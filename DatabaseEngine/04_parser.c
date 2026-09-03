@@ -1065,7 +1065,11 @@ static int parseSelectItem(const TokenList* tokens, int* index,
                 return ERROR_SYNTAX_EXPECTED_COLUMN;    /* only count(*) exists */
 
             out->star = ONE;
-            snprintf(out->label, NAME_LEN, "%s(*)", name);
+            /* Widths, not just a buffer size: an aggregate name plus "(*)"
+               can outrun the label, and saying where it is cut keeps the
+               truncation deliberate rather than something the compiler has to
+               warn about on every build. */
+            snprintf(out->label, NAME_LEN, "%.*s(*)", NAME_LEN - 4, name);
             i++;
         }
         else {
@@ -1079,7 +1083,8 @@ static int parseSelectItem(const TokenList* tokens, int* index,
             char inner[NAME_LEN];
 
             exprLabel(pool, out->expr, inner, sizeof inner);
-            snprintf(out->label, NAME_LEN, "%s(%s)", name, inner);
+            snprintf(out->label, NAME_LEN, "%.*s(%.*s)",
+                     NAME_LEN / TWO - TWO, name, NAME_LEN / TWO - TWO, inner);
         }
 
         if (typeAt(tokens, i++) != TOKEN_RPAREN)

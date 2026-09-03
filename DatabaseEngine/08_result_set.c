@@ -81,7 +81,7 @@ static void printValue(const Value* v)
     else if (v->type == TYPE_FLOAT)
         emitFloat(v->floatValue);
     else if (v->type == TYPE_DATE) {
-        char text[11];
+        char text[DATE_TEXT_LEN];
 
         dateToText(v->intValue, text);
         emit(text, 10);
