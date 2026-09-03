@@ -3,7 +3,7 @@
 [![CI](https://github.com/tomerIQ713/DatabaseEngine/actions/workflows/ci.yml/badge.svg)](https://github.com/tomerIQ713/DatabaseEngine/actions/workflows/ci.yml)
 
 A SQL database engine written from scratch in C99 — no dependencies, no
-libraries, about 14,000 lines. It has a buffer pool, write-ahead logging with
+libraries, about 14,700 lines. It has a buffer pool, write-ahead logging with
 crash recovery, persistent B+ tree indexes, checksummed pages, and it speaks
 the PostgreSQL wire protocol, so the official `psql` client connects to it and
 gets rows back.
@@ -34,16 +34,18 @@ Third-party drivers work too — the extended query protocol is implemented, so
 
 ## Build
 
-No dependencies beyond a C compiler.
+No dependencies beyond a C compiler and the platform's threads.
 
 ```bash
-cc -std=c17 -O2 -o db *.c
+cc -std=c17 -O2 -o db *.c -lpthread
 ```
 
-Builds on Linux, macOS and Windows; CI runs the suites on all three, plus a
-pass under AddressSanitizer and UBSan. On Windows add `-lws2_32` for the
-socket layer. There is also a Visual Studio
+On Windows, `-lws2_32` instead of `-lpthread`. There is also a Visual Studio
 solution (`DatabaseEngine.slnx`) if you prefer the IDE.
+
+Builds on Linux, macOS and Windows; CI runs the suites on all three, plus
+passes under AddressSanitizer, UndefinedBehaviourSanitizer and
+ThreadSanitizer.
 
 ```bash
 ./db :memory:        # throwaway session
@@ -51,10 +53,19 @@ solution (`DatabaseEngine.slnx`) if you prefer the IDE.
 ./db shop.db --port 5433
 ```
 
+There is a worked example in the repository — two tables, a join, grouping,
+indexes and a second database:
+
+```bash
+./db :memory: < demo.sql
+```
+
 ## Architecture
 
-It is structured as a compiler with an execution stage on the end. One
-statement goes through the whole pipeline before the next one starts.
+It is structured as a compiler with an execution stage on the end. A statement
+goes through every stage before it produces a row; several statements can be
+in the pipeline at once, one per connection, and the engine lock decides which
+of them may run together.
 
 ```
   SQL text
@@ -148,20 +159,22 @@ database.
 
 ## Measured
 
-`tests/bench.sh` generates its own data and reproduces these. One run on a
-Windows laptop, MinGW gcc `-O2`; they are wall clock over the whole session,
-so the load is in there too — fine for differences of this size, and honest
-about what is being timed.
+`tests/bench.sh` generates its own data and reproduces these. Wall clock over
+a whole session, so the load is in there too — fine for differences of this
+size, and honest about what is being timed. The absolute numbers move by a
+third or so between runs on a laptop; the ratios are the point.
 
 | | |
 |---|---|
-| 500 point queries over 200,000 rows, full scan | 4.40 s |
-| the same 500 with a B+ tree, *including building it* | **1.03 s** |
-| 2,000 inserts, one fsync per statement | 6.11 s |
-| the same 2,000 inside one transaction | **0.11 s** |
-| hash join, 20,000 × 5,000 rows, plus loading both | 0.18 s |
-| `order by` 50,000 rows with `limit 5`, plus loading them | 0.29 s |
-| printing 50,000 rows | 0.28 s |
+| 500 point queries over 200,000 rows, full scan | 2.60 s |
+| the same 500 with a B+ tree, *including building it* | **0.95 s** |
+| 2,000 inserts, one fsync per statement | 4.86 s |
+| the same 2,000 inside one transaction | **0.12 s** |
+| 4 concurrent readers, run one after another | 1.89 s |
+| the same 4 at the same time | **0.65 s** |
+| hash join, 20,000 × 5,000 rows, plus loading both | 0.22 s |
+| `order by` 50,000 rows with `limit 5`, plus loading them | 0.28 s |
+| printing 50,000 rows | 0.34 s |
 
 The last three are whole sessions rather than isolated operations, which is
 why they look flat: the join itself is well under a millisecond, and loading
@@ -169,31 +182,11 @@ why they look flat: the join itself is well under a millisecond, and loading
 them — the operations these replaced could not have hidden inside a session
 this short. The nested loop this join replaced took 2.96 s on the same data.
 
+The concurrency row comes from `tests/parallel.sh`, which fails if concurrent
+readers are not meaningfully faster than sequential ones.
+
 Design decisions behind these, and the measurements taken while making them,
 are in the design notes below.
-
-## What it does not do
-
-Worth knowing before you reach for it:
-
-- **Writes are serialised.** Reads run in parallel, but one reader-writer lock
-  covers the whole engine, so a write excludes everything and a transaction
-  holds the lock until it commits. A read-heavy load scales; a write-heavy one
-  does not. Finer-grained locking in the pool and the catalog is the upgrade,
-  and it is a great deal of work for a workload nobody has yet.
-- **Sixteen connections.** The seventeenth is refused rather than queued.
-- **No correlated subqueries.** An uncorrelated one is run once before the
-  outer query starts; a correlated one would have to be re-run per row, inside
-  a scan already using the executor's shared state. It is refused with an
-  error that says so, never answered wrongly.
-- **No `RIGHT`/`FULL JOIN`, no `UNION`, no subqueries in `FROM`.**
-- **`IN` with a literal list caps at about sixteen values**, because each one
-  spends two nodes of the fixed condition pool. Past that it is an error, not a
-  wrong answer; `IN (select ...)` has no such limit.
-- **No authentication.** Do not expose the port to a network you do not
-  control.
-- **psql's backslash commands don't work** - `\d` and friends are SQL against
-  `pg_catalog`, with joins and casts this engine doesn't have. Typed SQL does.
 
 ## Tests
 

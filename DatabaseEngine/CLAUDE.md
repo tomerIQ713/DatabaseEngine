@@ -120,7 +120,9 @@ are actually being faulted in rather than sitting in memory.
 `sql_common.h` is the single shared header: every limit, every error code, every
 struct, and every module's declarations. There are no per-module headers.
 
-Pipeline, one statement at a time through `ProcessStatement` in `10_controller.c`:
+Pipeline, one statement per connection through `ProcessStatement` in
+`10_controller.c` - several connections may be inside it at once, and the
+engine lock decides which of them run together:
 
 | Stage | File | Produces |
 |---|---|---|
@@ -347,7 +349,7 @@ And the pool keeps its *own* file handle: sharing the one `loadDatabase` reads
 with was a real bug, because faulting a page seeks while the metadata is still
 being read sequentially.
 
-Versions 1 through 4 still load and are written back as version 5.
+Versions 1 through 7 still load and are written back as version 8.
 
 **Nothing truncates SQL. Ever.** A statement that does not fit is refused -
 `ERROR_TOO_MANY_TOKENS` from the wire's `nextStatement`, `ERROR_TOKEN_TOO_LONG`

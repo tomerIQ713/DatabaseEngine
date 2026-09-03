@@ -8,6 +8,7 @@ jobs:
   linux:
     name: Linux (gcc)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -27,9 +28,14 @@ jobs:
         working-directory: DatabaseEngine
         run: ./tests/wire.sh ./db
 
+      - name: Readers in parallel
+        working-directory: DatabaseEngine
+        run: ./tests/parallel.sh ./db
+
   sanitizers:
     name: Linux (ASan + UBSan)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -63,6 +69,7 @@ jobs:
   races:
     name: Linux (ThreadSanitizer)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -86,11 +93,13 @@ jobs:
         working-directory: DatabaseEngine
         env:
           TSAN_OPTIONS: halt_on_error=1
+          ROWS: "400"
         run: ./tests/parallel.sh ./db-tsan
 
   macos:
     name: macOS (clang)
     runs-on: macos-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -102,9 +111,18 @@ jobs:
         working-directory: DatabaseEngine
         run: ./tests/run.sh ./db
 
+      - name: Crash recovery
+        working-directory: DatabaseEngine
+        run: ./tests/recovery.sh ./db
+
+      - name: Wire protocol
+        working-directory: DatabaseEngine
+        run: ./tests/wire.sh ./db
+
   windows:
     name: Windows (MSVC)
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2

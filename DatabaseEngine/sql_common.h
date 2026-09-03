@@ -1,3 +1,23 @@
+/*
+ * Two POSIX things this engine uses are hidden by a strict -std=c17: strcasecmp
+ * lives in <strings.h> behind a feature test, and PTHREAD_MUTEX_RECURSIVE is
+ * XSI rather than base POSIX. Compiling with -std=c17 defines __STRICT_ANSI__,
+ * which switches glibc's defaults off - so the build command in the README
+ * would fail on Linux without this, while MinGW never noticed because it is
+ * not glibc.
+ *
+ * Apple's headers go the other way and *remove* declarations under a bare
+ * _XOPEN_SOURCE, so they get the macro they actually want.
+ */
+#ifndef _WIN32
+#  ifdef __APPLE__
+#    define _DARWIN_C_SOURCE 1
+#  else
+#    define _XOPEN_SOURCE 700
+#    define _DEFAULT_SOURCE 1
+#  endif
+#endif
+
 #ifndef SQL_COMMON_H
 #define SQL_COMMON_H
 

@@ -1,3 +1,15 @@
+/* Before <pthread.h>: PTHREAD_MUTEX_RECURSIVE is XSI, and -std=c17 hides it.
+   The same reasoning as the block at the top of sql_common.h, repeated here
+   because this file reaches a system header before that one. */
+#ifndef _WIN32
+#  ifdef __APPLE__
+#    define _DARWIN_C_SOURCE 1
+#  else
+#    define _XOPEN_SOURCE 700
+#    define _DEFAULT_SOURCE 1
+#  endif
+#endif
+
 #ifdef _WIN32
 /* SRWLOCK arrived in Vista, and MinGW still defaults its headers to something
    older - without this the lock functions are simply not declared. */
